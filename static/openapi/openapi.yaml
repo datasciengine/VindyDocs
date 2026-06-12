@@ -1,0 +1,817 @@
+openapi: 3.1.0
+info:
+  title: Vindy API
+  version: 1.0.0
+  description: |
+    The Vindy API provides programmatic access to your Vindy data: assistant
+    definitions, call records, transcripts, AI-extracted structured data, and
+    audio recordings.
+
+    - REST API with JSON responses
+    - Bearer token authentication (API key in `<uuid>.<secret>` format)
+    - All endpoints under the `/v1/` prefix
+    - Cursor-based pagination on large lists
+    - All datetimes are ISO 8601 with UTC as the reference
+  contact:
+    name: Vindy
+servers:
+  - url: https://api.vindy.vinter.me
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Assistants
+    description: Assistants and squads
+  - name: Calls
+    description: Call records and recordings
+
+paths:
+  /v1/assistants:
+    get:
+      operationId: listAssistants
+      tags: [Assistants]
+      summary: List assistants and squads
+      description: >
+        Returns the company's assistants and squads in a single unified list.
+        Each item carries a `type` discriminator (`assistant` or `squad`).
+        Structured output schemas are included on each item. Ordering:
+        assistants first (created_at ASC), then squads (created_at ASC).
+      responses:
+        '200':
+          description: Unified list of assistants and squads.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/calls/list:
+    post:
+      operationId: listCalls
+      tags: [Calls]
+      summary: List calls
+      description: >
+        Returns call records for a given assistant or squad with cursor-based
+        pagination. Only finalized calls are returned: the call has ended
+        (completed, failed, or cancelled) and, if a recording exists, its
+        transfer has reached a terminal state. This endpoint is a query, not a
+        mutation — it has no side effects and is safe to retry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListCallsRequest'
+            examples:
+              byAssistant:
+                summary: Filter by assistant
+                value:
+                  assistant_id: 7
+                  from_date: '2026-05-01'
+                  to_date: '2026-06-01'
+                  limit: 100
+              bySquad:
+                summary: Filter by squad
+                value:
+                  squad_id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+                  limit: 50
+              turkeyBusinessHours:
+                summary: Turkey business hours (UTC+3)
+                value:
+                  assistant_id: 7
+                  from_date: '2026-05-23T09:00:00+03:00'
+                  to_date: '2026-05-23T17:00:00+03:00'
+      responses:
+        '200':
+          description: One page of calls.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCallsResponse'
+        '400':
+          description: >
+            Validation error. Possible codes: VALIDATION_FAILED,
+            DATE_RANGE_INVALID, INVALID_DATE_FORMAT, MISSING_TIMEZONE,
+            INVALID_CURSOR, MALFORMED_CURSOR.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/calls/{callId}/recording-url:
+    get:
+      operationId: getRecordingUrl
+      tags: [Calls]
+      summary: Get a 24-hour recording download URL
+      description: >
+        Generates a 24-hour temporary (presigned) download URL for a call's
+        recording. The URL requires no further authentication. Do not cache
+        the URL — generate one on demand.
+      parameters:
+        - name: callId
+          in: path
+          required: true
+          description: The call's numeric ID (from POST /v1/calls/list).
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Presigned download URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordingUrlResponse'
+        '400':
+          description: 'callId is not a positive integer (VALIDATION_FAILED).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: >
+            Either the call was not found or is not in your company
+            (RESOURCE_NOT_FOUND), or the call exists but no recording was ever
+            produced for it (RECORDING_NOT_AVAILABLE, terminal — carries
+            `extensions.recording_status: not_found`; do not retry).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: >
+            Recording exists but is not downloadable yet (RECORDING_NOT_READY).
+            The error carries `extensions.recording_status`: `failed` is
+            terminal (transfer permanently failed — do not retry, contact
+            Vindy); `pending` and `processing` are rare transient states
+            (retry in a few minutes).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/calls/bulk:
+    post:
+      operationId: createBulkCalls
+      tags: [Calls]
+      summary: Create a batch of outbound calls
+      description: >
+        Creates 1–200 outbound calls using one assistant or one squad. Each call
+        may carry an opaque metadata object that is returned verbatim. Only one
+        batch can be in progress per account at a time. The request is atomic: if
+        any phone number or metadata is invalid, no calls are created.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkCreateCallsRequest'
+      responses:
+        '201':
+          description: Batch created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkCreateCallsResponse'
+        '400':
+          description: >
+            Validation error. Possible codes: VALIDATION_FAILED,
+            INVALID_PHONE_NUMBER, INVALID_METADATA. INVALID_PHONE_NUMBER and
+            INVALID_METADATA carry extensions.details.index.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: >
+            Assistant or squad not found, not in your company, or not callable
+            (ASSISTANT_NOT_FOUND / SQUAD_NOT_FOUND).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: >
+            No outbound-capable number is configured (NO_OUTBOUND_PHONE_NUMBER),
+            or a batch is already running for the account (BATCH_IN_PROGRESS).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v1/calls/{callId}:
+    get:
+      operationId: getCall
+      tags: [Calls]
+      summary: Get a single call
+      description: >
+        Returns a single call by its stable call_id — the same shape as an item
+        in POST /v1/calls/list. Only finalized, customer-visible calls are
+        returned; in-progress calls return 404.
+      parameters:
+        - name: callId
+          in: path
+          required: true
+          description: The call's numeric ID.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: The call object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Call'
+        '400':
+          description: 'callId is not a positive integer (VALIDATION_FAILED).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: >
+            Call not found, not yet available (still in progress), or belongs to
+            another company (RESOURCE_NOT_FOUND).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/calls/{callId}/cancel:
+    post:
+      operationId: cancelCall
+      tags: [Calls]
+      summary: Cancel a single pending call
+      description: >
+        Cancels a single pending (not-yet-dialed) call in your company. Calls
+        already being dialed or already finished cannot be cancelled.
+      parameters:
+        - name: callId
+          in: path
+          required: true
+          description: The call's numeric ID.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: The call was cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelCallResponse'
+        '400':
+          description: >
+            VALIDATION_FAILED (callId not a positive integer), ERR_CALL_NOT_FOUND
+            (not found or not in your company), or ERR_CALL_ALREADY_FINAL
+            (already completed/failed/cancelled).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: >
+            The call is currently being dialed and can no longer be cancelled
+            (ERR_CALL_PROCESSING_CANCEL).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/calls/batches/{batchId}/cancel:
+    post:
+      operationId: cancelBatch
+      tags: [Calls]
+      summary: Cancel a batch's pending calls
+      description: >
+        Cancels all pending calls in a batch. Calls already being dialed or
+        finished are left untouched.
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          description: The batch's numeric ID (batch_call_id from POST /v1/calls/bulk).
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Pending calls cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelBatchResponse'
+        '400':
+          description: >
+            VALIDATION_FAILED (batchId not a positive integer), ERR_BATCH_NOT_FOUND
+            (not found or not in your company), ERR_BATCH_ALREADY_FINAL (no longer
+            running), or ERR_BATCH_NO_PENDING_CALLS (nothing left to cancel).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/calls/batches/{batchId}/calls:
+    post:
+      operationId: getBatchCalls
+      tags: [Calls]
+      summary: List a batch's calls
+      description: >
+        Returns the calls belonging to one batch with cursor-based pagination.
+        Each call has the same shape as an item in POST /v1/calls/list. There is
+        no date filter. Only finalized calls are returned.
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          description: The batch's numeric ID (batch_call_id from POST /v1/calls/bulk).
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchCallsRequest'
+      responses:
+        '200':
+          description: One page of the batch's calls.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchCallsResponse'
+        '400':
+          description: >
+            batchId is not a positive integer, limit is out of the 1–500 range, or
+            the body has an unexpected field (VALIDATION_FAILED).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: 'Batch not found or belongs to another company (RESOURCE_NOT_FOUND).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        API key in `<uuid>.<secret>` format (80 characters total), sent as
+        `Authorization: Bearer <api-key>`. Keys are bound to a single company.
+
+  responses:
+    Unauthorized:
+      description: >
+        Authentication error. Possible codes: MISSING_AUTH_HEADER,
+        INVALID_AUTH_FORMAT, INVALID_API_KEY.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: >
+        Unexpected server error. The code is HTTP_500 in extensions.code (the
+        top-level code is omitted). Report it with the requestId.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    StructuredOutput:
+      type: object
+      required: [id, name, schema]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: >
+            Stable structured output id. Same value used as the key in
+            `call_structured_data` on POST /v1/calls/list, so the two can be
+            correlated.
+        name:
+          type: string
+        schema:
+          type: object
+          description: >
+            JSON Schema. Field-level `description` keys and the `required`
+            array are omitted from the response.
+          additionalProperties: true
+
+    AssistantItem:
+      type: object
+      required: [type, assistant_id, assistant_name, assistant_created_at, structured_outputs]
+      properties:
+        type:
+          type: string
+          const: assistant
+        assistant_id:
+          type: integer
+          description: Stable assistant ID. Use in POST /v1/calls/list.
+        assistant_name:
+          type: string
+        assistant_language:
+          type: string
+          description: Language code (e.g. tr, en).
+        assistant_created_at:
+          type: string
+          format: date-time
+        structured_outputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/StructuredOutput'
+
+    SquadAssistantRef:
+      type: object
+      required: [assistant_id, assistant_name]
+      properties:
+        assistant_id:
+          type: integer
+        assistant_name:
+          type: string
+
+    SquadItem:
+      type: object
+      required: [type, squad_id, squad_created_at, squad_assistants, structured_outputs]
+      properties:
+        type:
+          type: string
+          const: squad
+        squad_id:
+          type: string
+          format: uuid
+          description: Stable squad ID. Use as squad_id in POST /v1/calls/list.
+        squad_name:
+          type: [string, 'null']
+        squad_created_at:
+          type: string
+          format: date-time
+        squad_assistants:
+          type: array
+          items:
+            $ref: '#/components/schemas/SquadAssistantRef'
+        structured_outputs:
+          type: array
+          description: Deduplicated union of member assistants' structured outputs.
+          items:
+            $ref: '#/components/schemas/StructuredOutput'
+
+    AssistantsResponse:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          description: >
+            Mixed list. Assistants first (created_at ASC), then squads
+            (created_at ASC).
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/AssistantItem'
+              - $ref: '#/components/schemas/SquadItem'
+            discriminator:
+              propertyName: type
+              mapping:
+                assistant: '#/components/schemas/AssistantItem'
+                squad: '#/components/schemas/SquadItem'
+        total:
+          type: integer
+          description: Size of the data array.
+
+    ListCallsRequest:
+      type: object
+      description: >
+        Exactly one of assistant_id or squad_id is required (both at once is
+        rejected).
+      properties:
+        assistant_id:
+          type: integer
+          minimum: 1
+          description: Filter by assistant ID. Mutually exclusive with squad_id.
+        squad_id:
+          type: string
+          format: uuid
+          description: Filter by squad ID. Mutually exclusive with assistant_id.
+        from_date:
+          type: string
+          description: >
+            ISO 8601. Inclusive (>=). Accepted: date-only (YYYY-MM-DD), UTC
+            datetime with optional milliseconds, or datetime with an explicit
+            offset. Datetimes without a timezone are rejected
+            (MISSING_TIMEZONE).
+        to_date:
+          type: string
+          description: >
+            ISO 8601. Exclusive (<). Date-only values are expanded to the
+            start of the next UTC day, so the entire named day is included.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 100
+        cursor:
+          type: string
+          description: >
+            Opaque cursor from a previous response's next_cursor. Omit on the
+            first request. Do not parse or modify.
+
+    Pagination:
+      type: object
+      required: [next_cursor, has_more, limit]
+      properties:
+        next_cursor:
+          type: [string, 'null']
+          description: Opaque cursor for the next page. null on the last page.
+        has_more:
+          type: boolean
+        limit:
+          type: integer
+
+    CallRecording:
+      type: object
+      required: [available]
+      properties:
+        available:
+          type: boolean
+          description: >
+            Whether a downloadable recording exists. `false` is TERMINAL for calls
+            returned by this endpoint — do not retry; either no recording was
+            produced or its transfer permanently failed.
+        url:
+          type: string
+          description: 24-hour presigned URL. Present only when available is true.
+        expires_at:
+          type: string
+          format: date-time
+          description: URL expiry (UTC). Present only when available is true.
+
+    Call:
+      type: object
+      required: [call_id, call_status, call_created_at, call_recording]
+      properties:
+        call_id:
+          type: integer
+          description: Stable call ID. Use in GET /v1/calls/{callId}/recording-url.
+        call_status:
+          type: string
+          enum: [completed, failed, cancelled]
+        call_assistant_id:
+          type: [integer, 'null']
+          description: Assistant ID that handled the call (null for squad calls).
+        call_squad_id:
+          type: [string, 'null']
+          format: uuid
+          description: Squad ID if the call was made via a squad.
+        call_phone_number:
+          type: string
+          description: Phone number (E.164 format when available). Not masked.
+        call_bound_type:
+          type: [string, 'null']
+          enum: [inbound, outbound, null]
+        call_started_at:
+          type: [string, 'null']
+          format: date-time
+        call_ended_at:
+          type: [string, 'null']
+          format: date-time
+        call_created_at:
+          type: string
+          format: date-time
+        call_duration_seconds:
+          type: [integer, 'null']
+        call_end_reason:
+          type: [string, 'null']
+          description: >
+            Technical reason the call ended. Wide, growing enum — do not fail
+            on unknown values. Common values: customer-ended-call,
+            assistant-ended-call, customer-did-not-answer,
+            phone-call-provider-closed-websocket, exceeded-max-duration,
+            silence-timed-out, pipeline-error-*,
+            assistant-ended-call-after-message-spoken.
+        call_transcript:
+          type: [string, 'null']
+          description: >
+            Plain-text transcript. Speaker turns are prefixed with `AI:`
+            (assistant) or `User:` (caller) and separated by newlines.
+        call_structured_data:
+          type: [object, 'null']
+          description: >
+            AI-extracted data, keyed by each structured output applied to the
+            call. Each key is the structured output `id` returned by
+            GET /v1/assistants; its value carries the output's `name` and
+            extracted `result`. Null when no structured data was produced.
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                type: string
+              result:
+                type: object
+                additionalProperties: true
+        call_metadata:
+          type: [object, 'null']
+          description: >
+            Opaque metadata sent via POST /v1/calls/bulk, returned verbatim for
+            correlation. Null when the call was created without metadata.
+          additionalProperties: true
+        call_recording:
+          $ref: '#/components/schemas/CallRecording'
+
+    ListCallsResponse:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Call'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    RecordingUrlResponse:
+      type: object
+      required: [url, expires_at]
+      properties:
+        url:
+          type: string
+          description: >
+            Presigned download URL. Issue an HTTP GET directly against it; the
+            signature is embedded. Expires after 24 hours — do not cache.
+        expires_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [statusCode, timestamp, path, message]
+      properties:
+        statusCode:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+        requestId:
+          type: string
+          description: UUID for this request — include it in bug reports.
+        code:
+          type: string
+          description: >
+            Machine-readable error code, also available at extensions.code.
+            Catalog: MISSING_AUTH_HEADER, INVALID_AUTH_FORMAT, INVALID_API_KEY,
+            RESOURCE_NOT_FOUND, VALIDATION_FAILED, INVALID_DATE_FORMAT,
+            MISSING_TIMEZONE, DATE_RANGE_INVALID, INVALID_CURSOR, MALFORMED_CURSOR,
+            RECORDING_NOT_AVAILABLE, RECORDING_NOT_READY, INVALID_PHONE_NUMBER,
+            INVALID_METADATA, ASSISTANT_NOT_FOUND, SQUAD_NOT_FOUND,
+            NO_OUTBOUND_PHONE_NUMBER, BATCH_IN_PROGRESS, ERR_CALL_NOT_FOUND,
+            ERR_CALL_ALREADY_FINAL, ERR_CALL_PROCESSING_CANCEL, ERR_BATCH_NOT_FOUND,
+            ERR_BATCH_ALREADY_FINAL, ERR_BATCH_NO_PENDING_CALLS. Unexpected server
+            errors (500) omit the top-level code and expose HTTP_500 in
+            extensions.code.
+        message:
+          type: string
+        validation_errors:
+          type: array
+          description: Present on some 400 errors — what failed validation.
+          items:
+            type: string
+        extensions:
+          type: object
+          description: >
+            Extra machine-readable detail for some errors, e.g.
+            recording_status on the recording-url endpoint — `not_found` (404
+            RECORDING_NOT_AVAILABLE), `failed` / `pending` / `processing` (409
+            RECORDING_NOT_READY), `completed` (200) — or details on date format
+            errors.
+          additionalProperties: true
+
+    BulkCallItem:
+      type: object
+      required: [phone_number]
+      properties:
+        phone_number:
+          type: string
+          description: >
+            Destination Turkish number. Accepts +905551112233, 905551112233,
+            05551112233, or 5551112233; common separators (spaces, dashes,
+            parentheses) are tolerated. Non-+90 numbers are rejected.
+        metadata:
+          type: object
+          description: >
+            Opaque key-value object, returned verbatim. Max 50 keys; key length
+            ≤ 40; value length ≤ 500; values must be string, number, or boolean
+            (no nested objects or arrays).
+          additionalProperties: true
+
+    BulkCreateCallsRequest:
+      type: object
+      required: [calls]
+      description: >
+        Exactly one of assistant_id or squad_id is required (both at once is
+        rejected).
+      properties:
+        assistant_id:
+          type: integer
+          minimum: 1
+          description: Assistant that places the calls. Mutually exclusive with squad_id.
+        squad_id:
+          type: string
+          format: uuid
+          description: Squad that places the calls. Mutually exclusive with assistant_id.
+        calls:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/BulkCallItem'
+
+    BulkCreateCallsResponse:
+      type: object
+      required: [batch_call_id, accepted]
+      properties:
+        batch_call_id:
+          type: integer
+          description: Identifier of the created batch. Keep it to cancel the batch later.
+        accepted:
+          type: integer
+          description: Number of calls queued.
+
+    CancelCallResponse:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: integer
+          description: The ID of the cancelled call.
+
+    CancelBatchResponse:
+      type: object
+      required: [batch_call_id, cancelled_pending_count]
+      properties:
+        batch_call_id:
+          type: integer
+        cancelled_pending_count:
+          type: integer
+          description: How many pending calls were cancelled by this request.
+
+    BatchCallsRequest:
+      type: object
+      description: Optional body; send {} for the first page with the default limit.
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 100
+        cursor:
+          type: string
+          description: >
+            Opaque cursor from a previous response's next_cursor. Omit on the
+            first request. Independent from the POST /v1/calls/list cursor.
+
+    BatchCallsResponse:
+      type: object
+      required: [batch_call_id, status, data, pagination]
+      properties:
+        batch_call_id:
+          type: integer
+        status:
+          type: string
+          enum: [running, completed, cancelled]
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Call'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
