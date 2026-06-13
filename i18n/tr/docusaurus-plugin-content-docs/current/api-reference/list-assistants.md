@@ -97,7 +97,7 @@ Sorgu parametresi yoktur.
 | Alan | Tür | Açıklama |
 |---|---|---|
 | `type` | `"assistant"` | Tür ayırt edici (discriminator). |
-| `assistant_id` | int | Kalıcı asistan kimliği. [`POST /v1/calls/list`](list-calls/index.md) isteğinde kullanılır. |
+| `assistant_id` | int | Kalıcı asistan kimliği. Bu asistanın çağrılarını filtrelemek için [`POST /v1/calls/list`](list-calls/index.md) isteğinde, toplu giden çağrı başlatırken de `assistant_id` olarak [`POST /v1/calls/bulk`](bulk-create-calls.md) isteğinde kullanılır. |
 | `assistant_name` | string | Görünen ad. |
 | `assistant_language` | string | Dil kodu (örneğin `tr`, `en`). |
 | `assistant_created_at` | ISO string | Oluşturulma zamanı (UTC). |
@@ -108,7 +108,7 @@ Sorgu parametresi yoktur.
 | Alan | Tür | Açıklama |
 |---|---|---|
 | `type` | `"squad"` | Tür ayırt edici (discriminator). |
-| `squad_id` | UUID | Kalıcı squad kimliği. [`POST /v1/calls/list`](list-calls/index.md) isteğinde `squad_id` olarak kullanılır. |
+| `squad_id` | UUID | Kalıcı squad kimliği. Squad'ın çağrılarını filtrelemek için [`POST /v1/calls/list`](list-calls/index.md) isteğinde `squad_id` olarak, toplu giden çağrı başlatırken de yine `squad_id` olarak [`POST /v1/calls/bulk`](bulk-create-calls.md) isteğinde kullanılır. |
 | `squad_name` | string \| null | Görünen ad. |
 | `squad_created_at` | ISO string | Oluşturulma zamanı (UTC). |
 | `squad_assistants` | array | Üye asistanlar (kısa meta veri: `assistant_id`, `assistant_name`). |
@@ -118,9 +118,9 @@ Sorgu parametresi yoktur.
 
 | Alan | Tür | Açıklama |
 |---|---|---|
-| `id` | string (UUID) | Structured output'un kalıcı kimliği. [`POST /v1/calls/list`](list-calls/index.md) yanıtındaki `call_structured_data` nesnesinde anahtar olarak kullanılan değerle aynıdır; böylece bir çağrının çıkarılan verisini şemasıyla eşleştirebilirsiniz. |
+| `id` | string (UUID) | Structured output'un kalıcı kimliği. Bir çağrının çıkarılan değerleri, [`POST /v1/calls/list`](list-calls/index.md) yanıtındaki `call_structured_data` içinde bu `id` altında döner; böylece her birini şemasıyla eşleştirebilirsiniz. |
 | `name` | string | Görünen ad. |
-| `schema` | object | JSON Schema. Alan düzeyindeki `description` anahtarları ve `required` dizisi yanıttan çıkarılır. |
+| `schema` | object | Structured output'un JSON Schema'sı — yapay zekânın bu çıktı için çıkardığı verinin yapısını tanımlar. Neredeyse her zaman, her alan adını türüyle eşleyen bir `properties` nesnesidir; örneğin `{"type":"object","properties":{"customer_name":{"type":"string"},"resolved":{"type":"boolean"}}}`. Bu şemaya göre çıkarılan değerler, [Çağrıları Listele](list-calls/index.md) yanıtındaki `call_structured_data` içinde çıktının `id` değeri altında döner. |
 
 ## Hatalar
 
@@ -133,9 +133,8 @@ Sorgu parametresi yoktur.
 
 - `data` dizisi şu sırayla döner: önce asistanlar (`created_at` artan), ardından squad'lar (`created_at` artan).
 - Aynı structured output, birden fazla asistanın ve squad'ın altında görünebilir; aynı `id` değerinin farklı öğelerde yer alması beklenen bir davranıştır.
-- Bir structured output'un `id` değeri, [Çağrıları Listele](list-calls/index.md) yanıtındaki `call_structured_data` içinde verisinin göründüğü anahtarla aynıdır; çağrının çıkarılan verisini buradaki şemayla bu sayede eşleştirebilirsiniz.
+- Çıkarılan değerler, [Çağrıları Listele](list-calls/index.md) yanıtındaki `call_structured_data` içinde her structured output'un `id` değeri altında döner; böylece bir çağrının verisini buradaki şemayla eşleştirebilirsiniz.
 - Squad'lar birer asistan grubudur; bir squad üzerinden yapılan çağrılar [`POST /v1/calls/list`](list-calls/index.md) endpoint'inde `squad_id` ile filtrelenebilir.
-- Bu endpoint sayfalama yapmaz. En fazla 1000 asistan ve 1000 squad döndürür; pratikte şirketlerin çok daha azı olur. Bu sınırı aşmayı bekliyorsanız Vindy ekibiyle iletişime geçin.
 
 ## Örnekler
 

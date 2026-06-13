@@ -97,7 +97,7 @@ No query parameters.
 | Field | Type | Description |
 |---|---|---|
 | `type` | `"assistant"` | Discriminator. |
-| `assistant_id` | int | Stable assistant ID. Use this in [`POST /v1/calls/list`](list-calls/index.md). |
+| `assistant_id` | int | Stable assistant ID. Use this in [`POST /v1/calls/list`](list-calls/index.md) to filter that assistant's calls, and as the `assistant_id` when launching a batch of outbound calls with [`POST /v1/calls/bulk`](bulk-create-calls.md). |
 | `assistant_name` | string | Display name. |
 | `assistant_language` | string | Language code (e.g. `tr`, `en`). |
 | `assistant_created_at` | ISO string | Creation timestamp (UTC). |
@@ -108,7 +108,7 @@ No query parameters.
 | Field | Type | Description |
 |---|---|---|
 | `type` | `"squad"` | Discriminator. |
-| `squad_id` | UUID | Stable squad ID. Use this in [`POST /v1/calls/list`](list-calls/index.md) as `squad_id`. |
+| `squad_id` | UUID | Stable squad ID. Use this in [`POST /v1/calls/list`](list-calls/index.md) as `squad_id` to filter the squad's calls, and as the `squad_id` when launching a batch of outbound calls with [`POST /v1/calls/bulk`](bulk-create-calls.md). |
 | `squad_name` | string \| null | Display name. |
 | `squad_created_at` | ISO string | Creation timestamp (UTC). |
 | `squad_assistants` | array | Member assistants (short metadata: `assistant_id`, `assistant_name`). |
@@ -118,9 +118,9 @@ No query parameters.
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | string (UUID) | Stable id of the structured output. This is the same value used as the key in `call_structured_data` on [`POST /v1/calls/list`](list-calls/index.md), so you can line a call's extracted data up with its schema. |
+| `id` | string (UUID) | Stable id of the structured output. A call's extracted values come back under this `id` in `call_structured_data` on [`POST /v1/calls/list`](list-calls/index.md), so you can line each one up with its schema. |
 | `name` | string | Display name. |
-| `schema` | object | JSON Schema. Field-level `description` keys and the `required` array are omitted from the response. |
+| `schema` | object | The structured output's JSON Schema — it describes the shape of the data the AI extracts for this output. Almost always an object whose `properties` map each field name to its type, for example `{"type":"object","properties":{"customer_name":{"type":"string"},"resolved":{"type":"boolean"}}}`. The values extracted against it come back under this output's `id` in `call_structured_data` on [List Calls](list-calls/index.md). |
 
 ## Errors
 
@@ -133,9 +133,8 @@ No query parameters.
 
 - The `data` array is ordered: assistants first (`created_at` ASC), then squads (`created_at` ASC).
 - The same structured output can appear under multiple assistants and squads (the same `id` may be present in multiple items — expected behavior).
-- A structured output's `id` matches the key under which its data appears in `call_structured_data` on [List Calls](list-calls/index.md) — use it to align a call's extracted data with the schema here.
+- Extracted values come back under each structured output's `id` in `call_structured_data` on [List Calls](list-calls/index.md), so you can line a call's data up with its schema here.
 - Squads are **groups of assistants** — calls made through a squad can be filtered with `squad_id` in [`POST /v1/calls/list`](list-calls/index.md).
-- This endpoint is not paginated. It returns up to 1000 assistants and up to 1000 squads; in practice companies have far fewer. If you expect to exceed this, contact the Vindy team.
 
 ## Examples
 

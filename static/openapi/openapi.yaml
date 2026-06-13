@@ -416,16 +416,20 @@ components:
           type: string
           format: uuid
           description: >
-            Stable structured output id. Same value used as the key in
-            `call_structured_data` on POST /v1/calls/list, so the two can be
-            correlated.
+            Stable structured output id. A call's extracted values come back
+            under this id in `call_structured_data` on POST /v1/calls/list, so
+            each one can be lined up with its schema.
         name:
           type: string
         schema:
           type: object
           description: >
-            JSON Schema. Field-level `description` keys and the `required`
-            array are omitted from the response.
+            The structured output's JSON Schema, describing the shape of the
+            data the AI extracts for this output. Almost always an object whose
+            `properties` map each field name to its type — e.g. `customer_name`
+            as a string and `resolved` as a boolean. The extracted values are
+            returned under this output's `id` in `call_structured_data` on
+            POST /v1/calls/list.
           additionalProperties: true
 
     AssistantItem:
