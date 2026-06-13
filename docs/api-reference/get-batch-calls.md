@@ -22,7 +22,7 @@ Calls appear in the same order and with the same visibility as [`POST /v1/calls/
 ## Request
 
 ```http
-POST https://api.vindy.vinter.me/v1/calls/batches/842/calls
+POST https://api-vindy.vinter.me/v1/calls/batches/842/calls
 Authorization: Bearer <api-key>
 Content-Type: application/json
 
@@ -143,7 +143,7 @@ If you [cancel the batch](cancel-batch.md), `status` switches to `cancelled` rig
 <TabItem value="curl" label="curl">
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/batches/842/calls \
+curl -X POST https://api-vindy.vinter.me/v1/calls/batches/842/calls \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"limit": 100}'
@@ -155,7 +155,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/batches/842/calls \
 ```javascript
 async function getBatchCalls(batchId, cursor) {
   const response = await fetch(
-    `https://api.vindy.vinter.me/v1/calls/batches/${batchId}/calls`,
+    `https://api-vindy.vinter.me/v1/calls/batches/${batchId}/calls`,
     {
       method: "POST",
       headers: {
@@ -194,7 +194,7 @@ def get_batch_calls(batch_call_id, cursor=None):
         payload["cursor"] = cursor
 
     response = requests.post(
-        f"https://api.vindy.vinter.me/v1/calls/batches/{batch_call_id}/calls",
+        f"https://api-vindy.vinter.me/v1/calls/batches/{batch_call_id}/calls",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
         json=payload,
     )
@@ -223,7 +223,7 @@ Resend `next_cursor` as `cursor` — with the same `batchId` — until `has_more
 
 ```bash
 # First request (no cursor)
-curl -X POST https://api.vindy.vinter.me/v1/calls/batches/842/calls \
+curl -X POST https://api-vindy.vinter.me/v1/calls/batches/842/calls \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"limit": 100}'
@@ -231,7 +231,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/batches/842/calls \
 # Response: { "status": "...", "data": [100 calls], "pagination": { "next_cursor": "X", "has_more": true } }
 
 # Next request (use next_cursor)
-curl -X POST https://api.vindy.vinter.me/v1/calls/batches/842/calls \
+curl -X POST https://api-vindy.vinter.me/v1/calls/batches/842/calls \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"limit": 100, "cursor": "X"}'
@@ -249,7 +249,7 @@ async function listAllBatchCalls(batchId) {
 
   do {
     const response = await fetch(
-      `https://api.vindy.vinter.me/v1/calls/batches/${batchId}/calls`,
+      `https://api-vindy.vinter.me/v1/calls/batches/${batchId}/calls`,
       {
         method: "POST",
         headers: {
@@ -297,7 +297,7 @@ def list_all_batch_calls(batch_call_id):
             payload["cursor"] = cursor
 
         response = requests.post(
-            f"https://api.vindy.vinter.me/v1/calls/batches/{batch_call_id}/calls",
+            f"https://api-vindy.vinter.me/v1/calls/batches/{batch_call_id}/calls",
             headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
             json=payload,
         )

@@ -55,7 +55,7 @@ async function syncCalls(assistantId, lastSyncedAt) {
   let cursor = undefined;
 
   do {
-    const response = await fetch("https://api.vindy.vinter.me/v1/calls/list", {
+    const response = await fetch("https://api-vindy.vinter.me/v1/calls/list", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.VINDY_API_KEY}`,
@@ -110,7 +110,7 @@ def sync_calls(assistant_id, last_synced_at):
             payload["cursor"] = cursor
 
         response = requests.post(
-            "https://api.vindy.vinter.me/v1/calls/list",
+            "https://api-vindy.vinter.me/v1/calls/list",
             headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
             json=payload,
         )
@@ -138,7 +138,7 @@ def sync_calls(assistant_id, last_synced_at):
 
 ```bash
 # 1. gün: tam dolum (backfill)
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id":7,"limit":500}'
@@ -146,7 +146,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/list \
 # Bu çalıştırmayı BAŞLATTIĞINIZ UTC zamanını last_synced_at olarak kaydedin (çağrıdaki bir alanı değil).
 
 # 2. gün ve sonrası: artımlı
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id":7,"from_date":"<last_synced_at>","limit":500}'

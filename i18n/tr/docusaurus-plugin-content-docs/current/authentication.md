@@ -62,7 +62,7 @@ Tüm hata yanıtları aynı JSON yapısını paylaşır; ayrıntılar için [Yan
 **Örnek — eksik header:**
 
 ```bash
-curl -i https://api.vindy.vinter.me/v1/assistants
+curl -i https://api-vindy.vinter.me/v1/assistants
 ```
 
 ```json
@@ -89,4 +89,4 @@ curl -i https://api.vindy.vinter.me/v1/assistants
 
 | Ortam | Base URL |
 |---|---|
-| Production | `https://api.vindy.vinter.me` |
+| Production | `https://api-vindy.vinter.me` |

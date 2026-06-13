@@ -22,7 +22,7 @@ Yalnızca **müşteriye gösterilebilir** çağrılar (durum `completed`, `faile
 ## İstek
 
 ```http
-GET https://api.vindy.vinter.me/v1/calls/12345
+GET https://api-vindy.vinter.me/v1/calls/12345
 Authorization: Bearer <api-key>
 ```
 
@@ -103,7 +103,7 @@ Başka bir şirkete ait bir `call_id`, var olmayan bir kimlikle aynı `404 RESOU
 
 ```bash
 curl -H "Authorization: Bearer $VINDY_API_KEY" \
-  https://api.vindy.vinter.me/v1/calls/12345
+  https://api-vindy.vinter.me/v1/calls/12345
 ```
 
 </TabItem>
@@ -112,7 +112,7 @@ curl -H "Authorization: Bearer $VINDY_API_KEY" \
 ```javascript
 async function getCall(callId) {
   const response = await fetch(
-    `https://api.vindy.vinter.me/v1/calls/${callId}`,
+    `https://api-vindy.vinter.me/v1/calls/${callId}`,
     { headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` } },
   );
 
@@ -140,7 +140,7 @@ import requests
 
 def get_call(call_id):
     response = requests.get(
-        f"https://api.vindy.vinter.me/v1/calls/{call_id}",
+        f"https://api-vindy.vinter.me/v1/calls/{call_id}",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
     )
 

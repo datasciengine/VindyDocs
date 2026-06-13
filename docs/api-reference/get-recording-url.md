@@ -16,7 +16,7 @@ Generates a 24-hour temporary (presigned) download URL for a specific call's rec
 ## Request
 
 ```http
-GET https://api.vindy.vinter.me/v1/calls/12345/recording-url
+GET https://api-vindy.vinter.me/v1/calls/12345/recording-url
 Authorization: Bearer <api-key>
 ```
 
@@ -128,7 +128,7 @@ For `call_id`s obtained from [`POST /v1/calls/list`](list-calls/index.md), `reco
 ```bash
 # 1. Get URL
 curl -H "Authorization: Bearer $VINDY_API_KEY" \
-  https://api.vindy.vinter.me/v1/calls/12345/recording-url
+  https://api-vindy.vinter.me/v1/calls/12345/recording-url
 # → { "url": "https://...call.wav?X-Amz-...", "expires_at": "..." }
 
 # 2. Download (quote the URL — query string is long)
@@ -144,7 +144,7 @@ import { writeFile } from "node:fs/promises";
 async function downloadRecording(callId) {
   // 1. Get a fresh presigned URL
   const response = await fetch(
-    `https://api.vindy.vinter.me/v1/calls/${callId}/recording-url`,
+    `https://api-vindy.vinter.me/v1/calls/${callId}/recording-url`,
     { headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` } },
   );
 
@@ -188,7 +188,7 @@ import requests
 def download_recording(call_id):
     # 1. Get a fresh presigned URL
     response = requests.get(
-        f"https://api.vindy.vinter.me/v1/calls/{call_id}/recording-url",
+        f"https://api-vindy.vinter.me/v1/calls/{call_id}/recording-url",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
     )
 

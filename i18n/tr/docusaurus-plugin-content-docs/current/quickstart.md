@@ -12,7 +12,7 @@ import TabItem from '@theme/TabItem';
 İlk Vindy API isteğinizi yaklaşık beş dakikada gönderin.
 
 :::info Base URL
-Production: `https://api.vindy.vinter.me`
+Production: `https://api-vindy.vinter.me`
 :::
 
 ---
@@ -37,7 +37,7 @@ export VINDY_API_KEY="01902f6e-7c5a-7000-8000-abc123def456.R3vP9LkX2nM8jY7fW1qZ4
 <TabItem value="curl" label="curl">
 
 ```bash
-curl https://api.vindy.vinter.me/v1/assistants \
+curl https://api-vindy.vinter.me/v1/assistants \
   -H "Authorization: Bearer $VINDY_API_KEY"
 ```
 
@@ -45,7 +45,7 @@ curl https://api.vindy.vinter.me/v1/assistants \
 <TabItem value="node" label="Node.js">
 
 ```javascript
-const response = await fetch("https://api.vindy.vinter.me/v1/assistants", {
+const response = await fetch("https://api-vindy.vinter.me/v1/assistants", {
   headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` },
 });
 const body = await response.json();
@@ -60,7 +60,7 @@ import os
 import requests
 
 response = requests.get(
-    "https://api.vindy.vinter.me/v1/assistants",
+    "https://api-vindy.vinter.me/v1/assistants",
     headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
 )
 print(response.json()["data"])
@@ -95,7 +95,7 @@ Asistanlarınız ve squad'larınız tek bir liste hâlinde döner. Bir sonraki a
 <TabItem value="curl" label="curl">
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id": 7, "limit": 10}'
@@ -105,7 +105,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/list \
 <TabItem value="node" label="Node.js">
 
 ```javascript
-const response = await fetch("https://api.vindy.vinter.me/v1/calls/list", {
+const response = await fetch("https://api-vindy.vinter.me/v1/calls/list", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${process.env.VINDY_API_KEY}`,
@@ -125,7 +125,7 @@ import os
 import requests
 
 response = requests.post(
-    "https://api.vindy.vinter.me/v1/calls/list",
+    "https://api-vindy.vinter.me/v1/calls/list",
     headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
     json={"assistant_id": 7, "limit": 10},
 )

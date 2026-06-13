@@ -62,7 +62,7 @@ All error responses share the same JSON shape — see [Response Format](concepts
 **Example — missing header:**
 
 ```bash
-curl -i https://api.vindy.vinter.me/v1/assistants
+curl -i https://api-vindy.vinter.me/v1/assistants
 ```
 
 ```json
@@ -89,4 +89,4 @@ curl -i https://api.vindy.vinter.me/v1/assistants
 
 | Environment | Base URL |
 |---|---|
-| Production | `https://api.vindy.vinter.me` |
+| Production | `https://api-vindy.vinter.me` |

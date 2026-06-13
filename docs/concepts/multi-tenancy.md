@@ -29,7 +29,7 @@ There is no tenant parameter to pass and nothing to configure. The key itself de
 ```bash
 # A call that is not yours behaves exactly like a call that doesn't exist:
 curl -H "Authorization: Bearer $VINDY_API_KEY" \
-  https://api.vindy.vinter.me/v1/calls/99999999/recording-url
+  https://api-vindy.vinter.me/v1/calls/99999999/recording-url
 ```
 
 ```json

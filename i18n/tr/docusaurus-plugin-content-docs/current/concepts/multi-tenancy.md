@@ -29,7 +29,7 @@ Her API anahtarı yalnızca tek bir şirkete bağlıdır. Tüm endpoint'ler otom
 ```bash
 # Size ait olmayan bir çağrı, var olmayan bir çağrıyla tıpatıp aynı şekilde davranır:
 curl -H "Authorization: Bearer $VINDY_API_KEY" \
-  https://api.vindy.vinter.me/v1/calls/99999999/recording-url
+  https://api-vindy.vinter.me/v1/calls/99999999/recording-url
 ```
 
 ```json

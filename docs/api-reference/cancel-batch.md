@@ -18,7 +18,7 @@ The `batchId` is the `batch_call_id` returned in the bulk response.
 ## Request
 
 ```http
-POST https://api.vindy.vinter.me/v1/calls/batches/842/cancel
+POST https://api-vindy.vinter.me/v1/calls/batches/842/cancel
 Authorization: Bearer <api-key>
 ```
 
@@ -61,7 +61,7 @@ This endpoint stops calls that haven't started yet. Calls already in progress ru
 <TabItem value="curl" label="curl">
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/batches/842/cancel \
+curl -X POST https://api-vindy.vinter.me/v1/calls/batches/842/cancel \
   -H "Authorization: Bearer $VINDY_API_KEY"
 # → { "batch_call_id": 842, "cancelled_pending_count": 37 }
 ```
@@ -72,7 +72,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/batches/842/cancel \
 ```javascript
 async function cancelBatch(batchId) {
   const response = await fetch(
-    `https://api.vindy.vinter.me/v1/calls/batches/${batchId}/cancel`,
+    `https://api-vindy.vinter.me/v1/calls/batches/${batchId}/cancel`,
     {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` },
@@ -102,7 +102,7 @@ import requests
 
 def cancel_batch(batch_call_id):
     response = requests.post(
-        f"https://api.vindy.vinter.me/v1/calls/batches/{batch_call_id}/cancel",
+        f"https://api-vindy.vinter.me/v1/calls/batches/{batch_call_id}/cancel",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
     )
 

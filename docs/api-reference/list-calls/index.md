@@ -31,7 +31,7 @@ This endpoint is the **pull** counterpart of the [`call-ended` webhook](../webho
 ## Request
 
 ```http
-POST https://api.vindy.vinter.me/v1/calls/list
+POST https://api-vindy.vinter.me/v1/calls/list
 Authorization: Bearer <api-key>
 Content-Type: application/json
 
@@ -266,6 +266,7 @@ The `call_end_reason` field is a technical code indicating how the call ended. *
 | `customer-ended-call` | The customer (end-user) hung up |
 | `assistant-ended-call` | The assistant ended the call (e.g., conversation concluded naturally) |
 | `customer-did-not-answer` | Outbound: no answer |
+| `customer-busy` | Outbound: the phone rang but the customer rejected the call without answering (line busy or call declined) |
 | `phone-call-provider-closed-websocket` | The telephony provider dropped the connection |
 | `exceeded-max-duration` | Maximum call duration reached |
 | `silence-timed-out` | Long silence timeout |
@@ -294,7 +295,7 @@ Other values may appear — the list grows as new providers and adapters are add
 
 ```bash
 # First request (no cursor)
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id":7,"limit":100}'
@@ -302,7 +303,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/list \
 # Response: { "data": [100 calls], "pagination": { "next_cursor": "X", "has_more": true } }
 
 # Next request (use next_cursor)
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id":7,"limit":100,"cursor":"X"}'
@@ -319,7 +320,7 @@ async function listAllCalls(assistantId) {
   let cursor = undefined;
 
   do {
-    const response = await fetch("https://api.vindy.vinter.me/v1/calls/list", {
+    const response = await fetch("https://api-vindy.vinter.me/v1/calls/list", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.VINDY_API_KEY}`,
@@ -362,7 +363,7 @@ def list_all_calls(assistant_id):
             payload["cursor"] = cursor
 
         response = requests.post(
-            "https://api.vindy.vinter.me/v1/calls/list",
+            "https://api-vindy.vinter.me/v1/calls/list",
             headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
             json=payload,
         )
@@ -388,7 +389,7 @@ print(f"{len(calls)} calls")
 ### Filter by squad
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"squad_id":"f47ac10b-58cc-4372-a567-0e02b2c3d479","limit":50}'
@@ -397,7 +398,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/list \
 ### Date range — single day
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -412,7 +413,7 @@ The date-only `to_date` expands to the start of the next UTC day, so **all of Ma
 ### Date range — Turkey business hours
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

@@ -31,7 +31,7 @@ Bu endpoint, [`call-ended` webhook'unun](../webhooks.md) **pull** karşılığı
 ## İstek
 
 ```http
-POST https://api.vindy.vinter.me/v1/calls/list
+POST https://api-vindy.vinter.me/v1/calls/list
 Authorization: Bearer <api-key>
 Content-Type: application/json
 
@@ -266,6 +266,7 @@ Vindy yönetim paneli, ses kayıtlarını başka kaynaklardan (örneğin geçici
 | `customer-ended-call` | Müşteri (son kullanıcı) görüşmeyi sonlandırdı |
 | `assistant-ended-call` | Asistan görüşmeyi sonlandırdı (örneğin konuşma doğal biçimde tamamlandı) |
 | `customer-did-not-answer` | Giden çağrı: müşteri yanıt vermedi |
+| `customer-busy` | Giden çağrı: telefon çaldı ancak müşteri yanıtlamadan çağrıyı reddetti (hat meşgul veya çağrı reddedildi) |
 | `phone-call-provider-closed-websocket` | Telefon sağlayıcısı bağlantıyı düşürdü |
 | `exceeded-max-duration` | Azami çağrı süresine ulaşıldı |
 | `silence-timed-out` | Uzun sessizlik nedeniyle zaman aşımı |
@@ -294,7 +295,7 @@ Yeni sağlayıcılar ve bileşenler eklendikçe liste genişlediğinden, başka 
 
 ```bash
 # İlk istek (cursor yok)
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id":7,"limit":100}'
@@ -302,7 +303,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/list \
 # Yanıt: { "data": [100 çağrı], "pagination": { "next_cursor": "X", "has_more": true } }
 
 # Sonraki istek (next_cursor değerini kullanın)
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id":7,"limit":100,"cursor":"X"}'
@@ -319,7 +320,7 @@ async function listAllCalls(assistantId) {
   let cursor = undefined;
 
   do {
-    const response = await fetch("https://api.vindy.vinter.me/v1/calls/list", {
+    const response = await fetch("https://api-vindy.vinter.me/v1/calls/list", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.VINDY_API_KEY}`,
@@ -362,7 +363,7 @@ def list_all_calls(assistant_id):
             payload["cursor"] = cursor
 
         response = requests.post(
-            "https://api.vindy.vinter.me/v1/calls/list",
+            "https://api-vindy.vinter.me/v1/calls/list",
             headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
             json=payload,
         )
@@ -388,7 +389,7 @@ print(f"{len(calls)} çağrı")
 ### Squad'a göre filtreleme
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"squad_id":"f47ac10b-58cc-4372-a567-0e02b2c3d479","limit":50}'
@@ -397,7 +398,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/list \
 ### Tarih aralığı — tek gün
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -412,7 +413,7 @@ Yalnızca tarih içeren `to_date`, ertesi UTC gününün başlangıcına genişl
 ### Tarih aralığı — Türkiye mesai saatleri
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

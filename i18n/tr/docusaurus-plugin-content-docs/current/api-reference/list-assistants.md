@@ -16,7 +16,7 @@ import TabItem from '@theme/TabItem';
 ## İstek
 
 ```http
-GET https://api.vindy.vinter.me/v1/assistants
+GET https://api-vindy.vinter.me/v1/assistants
 Authorization: Bearer <api-key>
 ```
 
@@ -143,7 +143,7 @@ Sorgu parametresi yoktur.
 <TabItem value="curl" label="curl">
 
 ```bash
-curl https://api.vindy.vinter.me/v1/assistants \
+curl https://api-vindy.vinter.me/v1/assistants \
   -H "Authorization: Bearer $VINDY_API_KEY"
 ```
 
@@ -151,7 +151,7 @@ curl https://api.vindy.vinter.me/v1/assistants \
 <TabItem value="node" label="Node.js">
 
 ```javascript
-const response = await fetch("https://api.vindy.vinter.me/v1/assistants", {
+const response = await fetch("https://api-vindy.vinter.me/v1/assistants", {
   headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` },
 });
 
@@ -180,7 +180,7 @@ import os
 import requests
 
 response = requests.get(
-    "https://api.vindy.vinter.me/v1/assistants",
+    "https://api-vindy.vinter.me/v1/assistants",
     headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
 )
 if not response.ok:

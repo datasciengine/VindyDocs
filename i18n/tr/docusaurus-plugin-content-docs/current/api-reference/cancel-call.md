@@ -18,7 +18,7 @@ Bir çağrı yalnızca hâlâ bekleme durumundayken iptal edilebilir. Halihazır
 ## İstek
 
 ```http
-POST https://api.vindy.vinter.me/v1/calls/12345/cancel
+POST https://api-vindy.vinter.me/v1/calls/12345/cancel
 Authorization: Bearer <api-key>
 ```
 
@@ -64,7 +64,7 @@ Aynı anda çok sayıda bekleyen çağrıyı — örneğin bir toplu aramadaki k
 <TabItem value="curl" label="curl">
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/12345/cancel \
+curl -X POST https://api-vindy.vinter.me/v1/calls/12345/cancel \
   -H "Authorization: Bearer $VINDY_API_KEY"
 # → { "id": 12345 }
 ```
@@ -75,7 +75,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/12345/cancel \
 ```javascript
 async function cancelCall(callId) {
   const response = await fetch(
-    `https://api.vindy.vinter.me/v1/calls/${callId}/cancel`,
+    `https://api-vindy.vinter.me/v1/calls/${callId}/cancel`,
     {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` },
@@ -106,7 +106,7 @@ import requests
 
 def cancel_call(call_id):
     response = requests.post(
-        f"https://api.vindy.vinter.me/v1/calls/{call_id}/cancel",
+        f"https://api-vindy.vinter.me/v1/calls/{call_id}/cancel",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
     )
 

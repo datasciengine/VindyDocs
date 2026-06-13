@@ -24,7 +24,7 @@ Only **one bulk batch** can be in progress per account at a time. Submitting a n
 ## Request
 
 ```http
-POST https://api.vindy.vinter.me/v1/calls/bulk
+POST https://api-vindy.vinter.me/v1/calls/bulk
 Authorization: Bearer <api-key>
 Content-Type: application/json
 
@@ -135,7 +135,7 @@ If **any** number or metadata in the request is invalid, **no calls are created*
 <TabItem value="curl" label="curl">
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/bulk \
+curl -X POST https://api-vindy.vinter.me/v1/calls/bulk \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -153,7 +153,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/bulk \
 
 ```javascript
 async function createBulkCalls(assistantId, targets) {
-  const response = await fetch("https://api.vindy.vinter.me/v1/calls/bulk", {
+  const response = await fetch("https://api-vindy.vinter.me/v1/calls/bulk", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.VINDY_API_KEY}`,
@@ -188,7 +188,7 @@ import requests
 
 def create_bulk_calls(assistant_id, targets):
     response = requests.post(
-        "https://api.vindy.vinter.me/v1/calls/bulk",
+        "https://api-vindy.vinter.me/v1/calls/bulk",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
         json={"assistant_id": assistant_id, "calls": targets},
     )
@@ -214,7 +214,7 @@ create_bulk_calls(7, [
 ### Call with a squad
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/bulk \
+curl -X POST https://api-vindy.vinter.me/v1/calls/bulk \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

@@ -41,7 +41,7 @@ sidebar_position: 3
 
 ```bash
 # İlk istek (cursor yok)
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id":7,"limit":100}'
@@ -49,7 +49,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/list \
 # Yanıt: { "data": [...], "pagination": { "next_cursor": "X", "has_more": true } }
 
 # Sonraki istek (next_cursor değerini kullanın)
-curl -X POST https://api.vindy.vinter.me/v1/calls/list \
+curl -X POST https://api-vindy.vinter.me/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"assistant_id":7,"limit":100,"cursor":"X"}'

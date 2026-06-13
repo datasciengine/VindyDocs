@@ -18,7 +18,7 @@ A call can only be cancelled while it is still pending. Calls that are already b
 ## Request
 
 ```http
-POST https://api.vindy.vinter.me/v1/calls/12345/cancel
+POST https://api-vindy.vinter.me/v1/calls/12345/cancel
 Authorization: Bearer <api-key>
 ```
 
@@ -64,7 +64,7 @@ To cancel many pending calls at once — for example every remaining call in a b
 <TabItem value="curl" label="curl">
 
 ```bash
-curl -X POST https://api.vindy.vinter.me/v1/calls/12345/cancel \
+curl -X POST https://api-vindy.vinter.me/v1/calls/12345/cancel \
   -H "Authorization: Bearer $VINDY_API_KEY"
 # → { "id": 12345 }
 ```
@@ -75,7 +75,7 @@ curl -X POST https://api.vindy.vinter.me/v1/calls/12345/cancel \
 ```javascript
 async function cancelCall(callId) {
   const response = await fetch(
-    `https://api.vindy.vinter.me/v1/calls/${callId}/cancel`,
+    `https://api-vindy.vinter.me/v1/calls/${callId}/cancel`,
     {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` },
@@ -106,7 +106,7 @@ import requests
 
 def cancel_call(call_id):
     response = requests.post(
-        f"https://api.vindy.vinter.me/v1/calls/{call_id}/cancel",
+        f"https://api-vindy.vinter.me/v1/calls/{call_id}/cancel",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
     )
 

@@ -16,7 +16,7 @@ Belirli bir çağrının ses kaydı için 24 saat geçerli, geçici ve imzalı (
 ## İstek
 
 ```http
-GET https://api.vindy.vinter.me/v1/calls/12345/recording-url
+GET https://api-vindy.vinter.me/v1/calls/12345/recording-url
 Authorization: Bearer <api-key>
 ```
 
@@ -128,7 +128,7 @@ Bu bölümdeki her hata bir `recording_status` değeri (`extensions` içinde) ta
 ```bash
 # 1. Bağlantıyı alın
 curl -H "Authorization: Bearer $VINDY_API_KEY" \
-  https://api.vindy.vinter.me/v1/calls/12345/recording-url
+  https://api-vindy.vinter.me/v1/calls/12345/recording-url
 # → { "url": "https://...call.wav?X-Amz-...", "expires_at": "..." }
 
 # 2. İndirin (bağlantıyı tırnak içine alın — sorgu dizesi uzundur)
@@ -144,7 +144,7 @@ import { writeFile } from "node:fs/promises";
 async function downloadRecording(callId) {
   // 1. Güncel bir imzalı bağlantı alın
   const response = await fetch(
-    `https://api.vindy.vinter.me/v1/calls/${callId}/recording-url`,
+    `https://api-vindy.vinter.me/v1/calls/${callId}/recording-url`,
     { headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` } },
   );
 
@@ -188,7 +188,7 @@ import requests
 def download_recording(call_id):
     # 1. Güncel bir imzalı bağlantı alın
     response = requests.get(
-        f"https://api.vindy.vinter.me/v1/calls/{call_id}/recording-url",
+        f"https://api-vindy.vinter.me/v1/calls/{call_id}/recording-url",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
     )
 
