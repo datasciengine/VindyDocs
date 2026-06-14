@@ -15,7 +15,7 @@ Kendi veritabanınızı, her seferinde tüm veriyi yeniden indirmeden Vindy ça�
 
 ## Tek seferlik aktarım ile sürekli senkronizasyon
 
-- **Tek seferlik dışa aktarım** (geçmişe yönelik bir rapor) için: tüm sayfalarda [cursor](../api-reference/list-calls/filtering-pagination.md#cursors) ile gezinebilirsiniz ve işlemi tamamlayın.
+- **Tek seferlik dışa aktarım** (geçmişe yönelik bir rapor) için: tüm sayfalarda [cursor](../api-reference/list-calls/filtering-pagination.md#cursors) ile gezinerek işlemi tamamlayın.
 - **Sürekli senkronizasyon** (canlı operasyon) için: `from_date` değerini son senkronizasyon zamanınıza eşitleyin ve yalnızca yeni hazır hâle gelen çağrıları alın.
 
 Önerilen sorgulama (polling) sıklığı: **dakikada birden fazla olmamalıdır.** Daha sık sorgulama genellikle gereksizdir; çağrılar milisaniye aralıklarla değil, gruplar hâlinde hazır hâle gelir.
@@ -24,13 +24,13 @@ Kendi veritabanınızı, her seferinde tüm veriyi yeniden indirmeden Vindy ça�
 
 ## Yaklaşım
 
-1. Veritabanınızda **`call_id` üzerinde bir benzersizlik (unique) kısıtı** kullanabilirsiniz ve her çağrıyı upsert edin.
-2. Kendi tarafınızda bir **`last_synced_at`** zamanı tutun — bunu **her senkronizasyon çalıştırmasını başlattığınız ana** (kendi UTC saatiniz) eşitleyin; çağrı nesnesindeki bir alana **değil** (aşağıdaki nota bakın).
+1. Veritabanınızda **`call_id` üzerinde bir benzersizlik (unique) kısıtı** kullanın ve her çağrıyı upsert edin.
+2. Kendi tarafınızda bir **`last_synced_at`** zamanı tutun — bunu, çağrı nesnesindeki bir alana **değil**, **her senkronizasyon çalıştırmasını başlattığınız ana** (kendi UTC saatinize) eşitleyin (aşağıdaki nota bakın).
 3. Bir sonraki senkronizasyonda `from_date=<last_synced_at>` ile sorgu gönderin. `from_date`, **çağrının size ne zaman sunulduğunu** filtreler; bu yüzden bir önceki çalıştırmanızın başlangıç zamanına dayanmak, o andan sonra hazır hâle gelen her şeyi yakalar.
-4. Her sayfayı upsert edin. Cursor'u oturum içinde kullanabilirsiniz ve işiniz bitince bırakın (uzun süre saklamanız önerilmez).
+4. Her sayfayı upsert edin. Cursor'u oturum içinde kullanın, işiniz bitince bırakın (uzun süre saklamanız önerilmez).
 
 :::info Neden bir saat değeri, `call_created_at` değil?
-Liste, **her çağrının size ne zaman sunulduğuna** göre sıralanır ve filtrelenir — bu, çağrı nesnesinde **yer almayan** sunucu tarafı bir andır. `call_created_at`, çağrının *kuyruğa alındığı* andır (daha erken ve sunulma anıyla ilgisiz); bunu watermark olarak kullanmak pencereyi sabitleyebilir ya da büyük örtüşmeleri yeniden taratır. `from_date`'i bir önceki çalıştırmayı **başlattığınız** ana dayamak sunulma anını doğru izler; `call_id` üzerinden upsert, küçük sınır örtüşmesini zararsız kılar. Sunucu saatiniz UTC ile tam senkron değilse güvenlik payı olarak bir-iki dakika çıkarın.
+Liste, **her çağrının size ne zaman sunulduğuna** göre sıralanır ve filtrelenir — bu, çağrı nesnesinde **yer almayan** sunucu tarafı bir andır. `call_created_at`, çağrının *kuyruğa alındığı* andır (daha erken ve sunulma anıyla ilgisiz); bunu watermark olarak kullanmak pencereyi sabitleyebilir ya da büyük örtüşmeleri yeniden taratabilir. `from_date`'i bir önceki çalıştırmayı **başlattığınız** ana dayamak, sunulma anını doğru izler; `call_id` üzerinden upsert, küçük sınır örtüşmesini zararsız kılar. Sunucu saatiniz UTC ile tam senkron değilse güvenlik payı olarak bir-iki dakika çıkarın.
 :::
 
 Bu yaklaşımın güvenli olmasının nedenleri:
