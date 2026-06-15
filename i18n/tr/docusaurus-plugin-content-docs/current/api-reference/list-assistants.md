@@ -35,7 +35,7 @@ Sorgu parametresi yoktur.
       "assistant_created_at": "2026-05-01T10:30:00.000Z",
       "structured_outputs": [
         {
-          "id": "9b1c7e2a-4d3f-4a8b-bc12-5e6f7a8b9c01",
+          "id": "7a2c9e84-1b3d-4f6a-9c80-2e5f7a1b3c9d",
           "name": "Support Ticket",
           "schema": {
             "type": "object",
@@ -55,6 +55,36 @@ Sorgu parametresi yoktur.
       ]
     },
     {
+      "type": "assistant",
+      "assistant_id": 9,
+      "assistant_name": "Müşteri Memnuniyeti",
+      "assistant_language": "tr",
+      "assistant_created_at": "2026-05-10T09:15:00.000Z",
+      "structured_outputs": [
+        {
+          "id": "9b1c7e2a-4d3f-4a8b-bc12-5e6f7a8b9c01",
+          "name": "Memnuniyet Anketi",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "age": {
+                "type": "integer"
+              },
+              "overall_satisfaction": {
+                "type": "integer"
+              },
+              "support_speed": {
+                "type": "integer"
+              },
+              "would_recommend": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
       "type": "squad",
       "squad_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
       "squad_name": "Sales Team",
@@ -65,7 +95,7 @@ Sorgu parametresi yoktur.
       ],
       "structured_outputs": [
         {
-          "id": "9b1c7e2a-4d3f-4a8b-bc12-5e6f7a8b9c01",
+          "id": "7a2c9e84-1b3d-4f6a-9c80-2e5f7a1b3c9d",
           "name": "Support Ticket",
           "schema": {
             "type": "object",
@@ -79,7 +109,7 @@ Sorgu parametresi yoktur.
       ]
     }
   ],
-  "total": 2
+  "total": 3
 }
 ```
 
