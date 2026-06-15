@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Overview
 
-The Vindy API gives you **programmatic access** to your Vindy data from your own systems. You can retrieve assistant definitions, call records, transcripts, AI-extracted structured data, and audio recordings over HTTP. You can also opt in to **webhooks** — Vindy notifies your endpoint the moment a call ends, and when a batch finishes, so you can react in near-real-time instead of polling. See [Webhooks](api-reference/webhooks.md).
+The Vindy API gives you **programmatic access** to your Vindy data from your own systems. You can retrieve assistant definitions, call records, transcripts, AI-extracted structured data, and audio recordings over HTTP. Beyond reading, you can start batches of outbound calls and cancel pending ones — a single call or an entire batch. You can also opt in to **webhooks** — Vindy notifies your endpoint the moment a call ends, and when a batch finishes, so you can react in near-real-time instead of polling. See [Webhooks](api-reference/webhooks.md).
 
 **At a glance:**
 
@@ -24,8 +24,12 @@ The Vindy API gives you **programmatic access** to your Vindy data from your own
 | You want to... | Use |
 |---|---|
 | See which assistants and squads your company has | [`GET /v1/assistants`](api-reference/list-assistants.md) |
+| Create a batch of outbound calls (1–200 in one request) | [`POST /v1/calls/bulk`](api-reference/bulk-create-calls.md) |
 | Pull call records — transcripts, structured data, recordings | [`POST /v1/calls/list`](api-reference/list-calls/index.md) |
+| Fetch a single call by its ID | [`GET /v1/calls/:callId`](api-reference/get-call.md) |
 | Track a batch and page through its calls | [`POST /v1/calls/batches/:batchId/calls`](api-reference/get-batch-calls.md) |
+| Cancel a single pending (not-yet-dialed) call | [`POST /v1/calls/:callId/cancel`](api-reference/cancel-call.md) |
+| Cancel a batch's pending calls | [`POST /v1/calls/batches/:batchId/cancel`](api-reference/cancel-batch.md) |
 | Download the audio recording of a specific call | [`GET /v1/calls/:callId/recording-url`](api-reference/get-recording-url.md) |
 | Be notified when a call ends or a batch finishes, instead of polling | [Webhooks](api-reference/webhooks.md) |
 

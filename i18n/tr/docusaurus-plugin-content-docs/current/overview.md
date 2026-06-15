@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # Genel Bakış
 
-Vindy API, Vindy verilerinize kendi sistemleriniz üzerinden programatik erişim sağlar. Asistan tanımlarınıza, çağrı kayıtlarınıza, transcript'lere, yapay zekânın çıkardığı yapısal verilere ve ses kayıtlarına HTTP üzerinden erişebilirsiniz. Dilerseniz **webhook**'ları da kullanabilirsiniz: Vindy, bir çağrı sona erdiği anda — ve bir toplu arama tamamlandığında — endpoint'inize bildirim gönderir; böylece sürekli sorgulamak (polling) yerine neredeyse anında tepki verebilirsiniz. Bkz. [Webhooks](api-reference/webhooks.md).
+Vindy API, Vindy verilerinize kendi sistemleriniz üzerinden programatik erişim sağlar. Asistan tanımlarınıza, çağrı kayıtlarınıza, transcript'lere, yapay zekânın çıkardığı yapısal verilere ve ses kayıtlarına HTTP üzerinden erişebilirsiniz. Veri okumanın ötesinde, giden çağrılardan oluşan toplu aramalar oluşturabilir; henüz aranmamış çağrıları tek tek veya toplu arama düzeyinde iptal edebilirsiniz. Dilerseniz **webhook**'ları da kullanabilirsiniz: Vindy, bir çağrı sona erdiği anda — ve bir toplu arama tamamlandığında — endpoint'inize bildirim gönderir; böylece sürekli sorgulamak (polling) yerine neredeyse anında tepki verebilirsiniz. Bkz. [Webhooks](api-reference/webhooks.md).
 
 **Genel özellikler:**
 
@@ -24,8 +24,12 @@ Vindy API, Vindy verilerinize kendi sistemleriniz üzerinden programatik erişim
 | Amaç | İlgili endpoint |
 |---|---|
 | Şirketinizin asistanlarını ve squad'larını görüntülemek | [`GET /v1/assistants`](api-reference/list-assistants.md) |
+| Giden bir toplu arama oluşturmak (tek istekte 1–200 çağrı) | [`POST /v1/calls/bulk`](api-reference/bulk-create-calls.md) |
 | Çağrı kayıtlarını almak — transcript, yapısal veri, ses kaydı | [`POST /v1/calls/list`](api-reference/list-calls/index.md) |
+| Tek bir çağrıyı kimliğiyle getirmek | [`GET /v1/calls/:callId`](api-reference/get-call.md) |
 | Bir toplu aramayı takip etmek ve çağrılarını sayfalamak | [`POST /v1/calls/batches/:batchId/calls`](api-reference/get-batch-calls.md) |
+| Henüz aranmamış (bekleyen) tek bir çağrıyı iptal etmek | [`POST /v1/calls/:callId/cancel`](api-reference/cancel-call.md) |
+| Bir toplu aramanın bekleyen çağrılarını iptal etmek | [`POST /v1/calls/batches/:batchId/cancel`](api-reference/cancel-batch.md) |
 | Belirli bir çağrının ses kaydını indirmek | [`GET /v1/calls/:callId/recording-url`](api-reference/get-recording-url.md) |
 | Bir çağrı sona erdiğinde veya bir toplu arama tamamlandığında, sorgulamadan haberdar olmak | [Webhooks](api-reference/webhooks.md) |
 
