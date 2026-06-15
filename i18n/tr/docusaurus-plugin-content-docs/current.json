@@ -14,5 +14,9 @@
   "sidebar.tutorialSidebar.category.Guides": {
     "message": "Rehberler",
     "description": "The label for category Guides in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Calls": {
+    "message": "Aramalar",
+    "description": "The label for category Calls in sidebar tutorialSidebar"
   }
 }
