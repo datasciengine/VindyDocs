@@ -9,18 +9,18 @@ import TabItem from '@theme/TabItem';
 
 # `GET /v1/assistants`
 
-Şirketinizin asistanlarını ve squad'larını tek bir birleşik liste hâlinde döndürür. Her öğe, türünü belirten bir `type` alanı taşır (`"assistant"` veya `"squad"`). Asistanlara bağlı structured output şemaları her öğede yer alır. Squad'lar için structured output'lar, squad'a üye asistanların şemalarının yinelenenlerden arındırılmış birleşimidir.
+Şirketinizin asistanlarını **tek bir liste** hâlinde döndürür. Her öğe bir `type` alanı (şu an her zaman `"assistant"`) ve varsa o asistana bağlı **structured output şemasını** taşır.
 
 ---
 
 ## İstek
 
 ```http
-GET https://api-vindy.vinter.me/v1/assistants
+GET https://api.vindy.ai/v1/assistants
 Authorization: Bearer <api-key>
 ```
 
-Sorgu parametresi yoktur.
+Sorgu parametresi yoktur. Yanıt **sayfalanmaz** — tüm asistanlar tek çağrıda döner (en fazla 1000).
 
 ## Yanıt (200 OK)
 
@@ -29,69 +29,31 @@ Sorgu parametresi yoktur.
   "data": [
     {
       "type": "assistant",
-      "assistant_id": 7,
-      "assistant_name": "Customer Support",
+      "assistant_id": "8f3a1c20-4d3f-4a8b-bc12-5e6f7a8b9c01",
+      "assistant_name": "Vindy - Asistan",
       "assistant_language": "tr",
-      "assistant_created_at": "2026-05-01T10:30:00.000Z",
+      "assistant_created_at": "2026-06-08T10:29:55+00:00",
+      "assistant_variables": ["first_name", "appointment_time"],
       "structured_outputs": [
         {
-          "id": "9b1c7e2a-4d3f-4a8b-bc12-5e6f7a8b9c01",
-          "name": "Memnuniyet Anketi",
+          "id": "8f3a1c20-4d3f-4a8b-bc12-5e6f7a8b9c01",
+          "name": "Vindy - Asistan",
           "schema": {
             "type": "object",
             "properties": {
-              "age": {
-                "type": "integer"
-              },
-              "overall_satisfaction": {
-                "type": "integer"
-              },
-              "support_speed": {
-                "type": "integer"
-              },
-              "would_recommend": {
-                "type": "boolean"
-              }
-            }
-          }
-        }
-      ]
-    },
-    {
-      "type": "squad",
-      "squad_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-      "squad_name": "Sales Team",
-      "squad_created_at": "2026-05-15T14:20:00.000Z",
-      "squad_assistants": [
-        { "assistant_id": 7, "assistant_name": "Customer Support" },
-        { "assistant_id": 8, "assistant_name": "Sales Assistant" }
-      ],
-      "structured_outputs": [
-        {
-          "id": "9b1c7e2a-4d3f-4a8b-bc12-5e6f7a8b9c01",
-          "name": "Memnuniyet Anketi",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "age": {
-                "type": "integer"
-              },
-              "overall_satisfaction": {
-                "type": "integer"
-              },
-              "support_speed": {
-                "type": "integer"
-              },
-              "would_recommend": {
-                "type": "boolean"
-              }
-            }
+              "age": { "type": "integer" },
+              "overall_satisfaction": { "type": "integer" },
+              "support_speed": { "type": "integer" },
+              "would_recommend": { "type": "boolean" }
+            },
+            "additionalProperties": false,
+            "required": ["overall_satisfaction", "would_recommend"]
           }
         }
       ]
     }
   ],
-  "total": 2
+  "total": 1
 }
 ```
 
@@ -101,52 +63,43 @@ Sorgu parametresi yoktur.
 
 | Alan | Tür | Açıklama |
 |---|---|---|
-| `data` | array | Asistan ve/veya squad öğelerinden oluşan karışık liste. |
+| `data` | array | Asistan öğeleri. |
 | `total` | int | `data` dizisinin uzunluğu. |
 
-**Asistan öğesi (`type: "assistant"`)**
+**Asistan öğesi**
 
 | Alan | Tür | Açıklama |
 |---|---|---|
-| `type` | `"assistant"` | Tür ayırt edici (discriminator). |
-| `assistant_id` | int | Kalıcı asistan kimliği. Bu asistanın çağrılarını filtrelemek için [`POST /v1/calls/list`](list-calls/index.md) isteğinde, toplu giden çağrı başlatırken de `assistant_id` olarak [`POST /v1/calls/bulk`](bulk-create-calls.md) isteğinde kullanılır. |
+| `type` | string | Tür ayırt edici (discriminator) — şu an her zaman `"assistant"`. |
+| `assistant_id` | string (UUID) | Kalıcı asistan kimliği. Bu asistanın çağrılarını filtrelemek için [`POST /v1/calls/list`](list-calls/index.md) isteğinde, toplu giden çağrı başlatırken de `assistant_id` olarak [`POST /v1/calls/bulk`](bulk-create-calls.md) isteğinde kullanılır. |
 | `assistant_name` | string | Görünen ad. |
 | `assistant_language` | string | Dil kodu (örneğin `tr`, `en`). |
-| `assistant_created_at` | ISO string | Oluşturulma zamanı (UTC). |
-| `structured_outputs` | array | Bu asistana bağlı structured output şemaları. |
+| `assistant_created_at` | ISO 8601 (UTC) | Oluşturulma zamanı, `+00:00` offset biçiminde. |
+| `assistant_variables` | array of string | Bu asistanın beklediği **şablon değişken adları** — prompt ve karşılama (greeting) metnindeki `{{…}}` yer tutucularından türetilir (sıralı, tekilleştirilmiş). Çağrı yaparken bu değerleri [`POST /v1/calls`](create-call.md) veya [`POST /v1/calls/bulk`](bulk-create-calls.md) ile `variables` üzerinden gönderin. Asistan hiç değişken kullanmıyorsa boştur (`[]`). |
+| `structured_outputs` | array | Bu asistana bağlı structured output şeması. Asistanın şeması yoksa boştur (`[]`); varsa `id` değeri asistanın `id` değerine eşit olan **tek** bir giriş bulunur. |
 
-**Squad öğesi (`type: "squad"`)**
-
-| Alan | Tür | Açıklama |
-|---|---|---|
-| `type` | `"squad"` | Tür ayırt edici (discriminator). |
-| `squad_id` | UUID | Kalıcı squad kimliği. Squad'ın çağrılarını filtrelemek için [`POST /v1/calls/list`](list-calls/index.md) isteğinde `squad_id` olarak, toplu giden çağrı başlatırken de yine `squad_id` olarak [`POST /v1/calls/bulk`](bulk-create-calls.md) isteğinde kullanılır. |
-| `squad_name` | string \| null | Görünen ad. |
-| `squad_created_at` | ISO string | Oluşturulma zamanı (UTC). |
-| `squad_assistants` | array | Üye asistanlar (kısa meta veri: `assistant_id`, `assistant_name`). |
-| `structured_outputs` | array | Üye asistanların structured output'larının yinelenenlerden arındırılmış birleşimi. |
-
-**StructuredOutput nesnesi (her iki öğe türünde de aynı yapı)**
+**StructuredOutput nesnesi**
 
 | Alan | Tür | Açıklama |
 |---|---|---|
-| `id` | string (UUID) | Structured output'un kalıcı kimliği. Bir çağrının çıkarılan değerleri, [`POST /v1/calls/list`](list-calls/index.md) yanıtındaki `call_structured_data` içinde bu `id` altında döner; böylece her birini şemasıyla eşleştirebilirsiniz. |
-| `name` | string | Görünen ad. |
-| `schema` | object | Structured output'un JSON Schema'sı — yapay zekânın bu çıktı için çıkardığı verinin yapısını tanımlar. Neredeyse her zaman, her alan adını türüyle eşleyen bir `properties` nesnesidir; örneğin `{"type":"object","properties":{"customer_name":{"type":"string"},"resolved":{"type":"boolean"}}}`. Bu şemaya göre çıkarılan değerler, [Çağrıları Listele](list-calls/index.md) yanıtındaki `call_structured_data` içinde çıktının `id` değeri altında döner. |
+| `id` | string (UUID) | Structured output'un kalıcı kimliği — asistanın `id` değerine eşittir. Bir çağrının çıkarılan değerleri, [`POST /v1/calls/list`](list-calls/index.md) yanıtındaki `call_structured_data` içinde bu `id` altında döner; böylece her birini şemasıyla eşleştirebilirsiniz. |
+| `name` | string | Görünen ad (asistanın adını yansıtır). |
+| `schema` | object | Structured output'un **JSON Schema**'sı — yapay zekânın çıkardığı verinin yapısını tanımlar ve asistan için tanımlandığı haliyle aynen döner. Çekirdeği, her alan adını türüyle eşleyen bir `properties` nesnesidir. `properties` yanında herhangi bir standart JSON Schema anahtarı taşıyabilir — sık görülenler: `additionalProperties` (genelde `false`; listelenenler dışında alan yok demektir) ve `required` (her zaman bulunan alanlar), ayrıca seçim alanları için `enum`/`uniqueItems`. Bunu opak bir JSON Schema olarak ele alın: alanları öğrenmek için `properties`'i okuyun ve yalnızca `type`/`properties` bulunacağını varsaymayın. |
 
 ## Hatalar
 
 | Durum | Kod |
 |---|---|
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` |
-| `500` | `HTTP_500` |
+| `429` | `RATE_LIMITED` |
 
 ## Notlar
 
-- `data` dizisi şu sırayla döner: önce asistanlar (`created_at` artan), ardından squad'lar (`created_at` artan).
-- Aynı structured output, birden fazla asistanın ve squad'ın altında görünebilir; aynı `id` değerinin farklı öğelerde yer alması beklenen bir davranıştır.
-- Çıkarılan değerler, [Çağrıları Listele](list-calls/index.md) yanıtındaki `call_structured_data` içinde her structured output'un `id` değeri altında döner; böylece bir çağrının verisini buradaki şemayla eşleştirebilirsiniz.
-- Squad'lar birer asistan grubudur; bir squad üzerinden yapılan çağrılar [`POST /v1/calls/list`](list-calls/index.md) endpoint'inde `squad_id` ile filtrelenebilir.
+- Asistanlar oluşturulma zamanına göre sıralanır.
+- Liste, kendi organizasyonunuzun asistanlarını **ve Vindy tarafından sizinle paylaşılan asistanları** birlikte içerir — paylaşılan asistanlar burada kendi asistanlarınız gibi davranır: [Çağrıları Listele](list-calls/index.md)'de onların çağrılarını filtreleyebilir, [Toplu Çağrı Oluştur](bulk-create-calls.md) ile onlarla giden çağrı başlatabilirsiniz.
+- Structured output şeması olmayan bir asistan `structured_outputs: []` döndürür.
+- `assistant_variables`, bu asistanla arama yaparken hangi `variables` anahtarlarını göndereceğinizi söyler. Asistan hiç değişken kullanmıyorsa `variables`'ı tümüyle atlayabilirsiniz.
+- Çıkarılan değerler, [Çağrıları Listele](list-calls/index.md) yanıtındaki `call_structured_data` içinde structured output'un `id` değeri altında döner; böylece bir çağrının verisini buradaki şemayla eşleştirebilirsiniz.
 
 ## Örnekler
 
@@ -154,7 +107,7 @@ Sorgu parametresi yoktur.
 <TabItem value="curl" label="curl">
 
 ```bash
-curl https://api-vindy.vinter.me/v1/assistants \
+curl https://api.vindy.ai/v1/assistants \
   -H "Authorization: Bearer $VINDY_API_KEY"
 ```
 
@@ -162,24 +115,20 @@ curl https://api-vindy.vinter.me/v1/assistants \
 <TabItem value="node" label="Node.js">
 
 ```javascript
-const response = await fetch("https://api-vindy.vinter.me/v1/assistants", {
+const response = await fetch("https://api.vindy.ai/v1/assistants", {
   headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` },
 });
 
 if (!response.ok) {
   const error = await response.json();
-  throw new Error(`${error.code}: ${error.message}`);
+  throw new Error(`${error.extensions?.code}: ${error.message}`);
 }
 
 const { data, total } = await response.json();
-console.log(`${total} öğe`);
+console.log(`${total} asistan`);
 
-for (const item of data) {
-  if (item.type === "assistant") {
-    console.log(`Asistan #${item.assistant_id}: ${item.assistant_name}`);
-  } else {
-    console.log(`Squad ${item.squad_id}: ${item.squad_name}`);
-  }
+for (const assistant of data) {
+  console.log(`${assistant.assistant_id}: ${assistant.assistant_name}`);
 }
 ```
 
@@ -191,21 +140,18 @@ import os
 import requests
 
 response = requests.get(
-    "https://api-vindy.vinter.me/v1/assistants",
+    "https://api.vindy.ai/v1/assistants",
     headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
 )
 if not response.ok:
     error = response.json()
-    raise RuntimeError(f"{error.get('code')}: {error.get('message')}")
+    raise RuntimeError(f"{error.get('extensions', {}).get('code')}: {error.get('message')}")
 
 body = response.json()
-print(f"{body['total']} öğe")
+print(f"{body['total']} asistan")
 
-for item in body["data"]:
-    if item["type"] == "assistant":
-        print(f"Asistan #{item['assistant_id']}: {item['assistant_name']}")
-    else:
-        print(f"Squad {item['squad_id']}: {item['squad_name']}")
+for assistant in body["data"]:
+    print(f"{assistant['assistant_id']}: {assistant['assistant_name']}")
 ```
 
 </TabItem>

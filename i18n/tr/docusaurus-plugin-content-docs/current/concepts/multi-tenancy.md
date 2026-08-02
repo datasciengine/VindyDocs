@@ -29,23 +29,14 @@ Her API anahtarı yalnızca tek bir şirkete bağlıdır. Tüm endpoint'ler otom
 ```bash
 # Size ait olmayan bir çağrı, var olmayan bir çağrıyla tıpatıp aynı şekilde davranır:
 curl -H "Authorization: Bearer $VINDY_API_KEY" \
-  https://api-vindy.vinter.me/v1/calls/99999999/recording-url
+  https://api.vindy.ai/v1/calls/sess_ff00ee11dd22/recording-url
 ```
 
 ```json
 {
-  "statusCode": 404,
-  "timestamp": "2026-06-03T12:34:56.789Z",
-  "path": "/v1/calls/99999999/recording-url",
-  "requestId": "01902f6e-...",
-  "code": "RESOURCE_NOT_FOUND",
   "message": "Call not found.",
   "extensions": {
-    "code": "RESOURCE_NOT_FOUND",
-    "statusCode": 404,
-    "timestamp": "2026-06-03T12:34:56.789Z",
-    "path": "/v1/calls/99999999/recording-url",
-    "requestId": "01902f6e-..."
+    "code": "RESOURCE_NOT_FOUND"
   }
 }
 ```

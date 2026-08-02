@@ -13,7 +13,7 @@ The Vindy API gives you **programmatic access** to your Vindy data from your own
 - REST API with JSON responses
 - Bearer token authentication (API key)
 - All endpoints under the **`/v1/`** prefix
-- Responses are `application/json; charset=utf-8`
+- Responses are `application/json`
 - Cursor-based pagination on large lists
 - Optional **webhook** delivery for `call-ended` and `batch-ended` events
 
@@ -23,7 +23,8 @@ The Vindy API gives you **programmatic access** to your Vindy data from your own
 
 | You want to... | Use |
 |---|---|
-| See which assistants and squads your company has | [`GET /v1/assistants`](api-reference/list-assistants.md) |
+| See which assistants your company has | [`GET /v1/assistants`](api-reference/list-assistants.md) |
+| See which caller numbers you can place calls from | [`GET /v1/phone-numbers`](api-reference/list-phone-numbers.md) |
 | Create a batch of outbound calls (1–200 in one request) | [`POST /v1/calls/bulk`](api-reference/bulk-create-calls.md) |
 | Pull call records — transcripts, structured data, recordings | [`POST /v1/calls/list`](api-reference/list-calls/index.md) |
 | Fetch a single call by its ID | [`GET /v1/calls/:callId`](api-reference/get-call.md) |

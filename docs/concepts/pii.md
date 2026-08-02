@@ -28,4 +28,5 @@ Retention, deletion, and anonymization policies for data you copy into your own 
 
 - Only sync the fields you actually need.
 - Apply your own retention policy to transcripts and recordings you download.
+- Recording download URLs are valid for about 24 hours (86400 seconds) by default, and configurable. Store the downloaded audio file, not the URL.
 - If you forward recordings to your own users, generate a fresh download URL per user instead of sharing one — see [recording retrieval](../guides/recording-retrieval.md).

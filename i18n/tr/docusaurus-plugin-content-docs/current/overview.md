@@ -13,7 +13,7 @@ Vindy API, Vindy verilerinize kendi sistemleriniz üzerinden programatik erişim
 - JSON yanıt döndüren REST API
 - Bearer token ile kimlik doğrulama (API anahtarı)
 - Tüm endpoint'ler `/v1/` ön eki altında
-- Yanıtlar `application/json; charset=utf-8` biçiminde
+- Yanıtlar `application/json` biçiminde
 - Büyük listelerde cursor tabanlı pagination
 - `call-ended` ve `batch-ended` olayları için isteğe bağlı **webhook** teslimatı
 
@@ -23,7 +23,8 @@ Vindy API, Vindy verilerinize kendi sistemleriniz üzerinden programatik erişim
 
 | Amaç | İlgili endpoint |
 |---|---|
-| Şirketinizin asistanlarını ve squad'larını görüntülemek | [`GET /v1/assistants`](api-reference/list-assistants.md) |
+| Şirketinizin asistanlarını görüntülemek | [`GET /v1/assistants`](api-reference/list-assistants.md) |
+| Çağrıları hangi arayan numaralardan yapabileceğinizi görmek | [`GET /v1/phone-numbers`](api-reference/list-phone-numbers.md) |
 | Giden bir toplu arama oluşturmak (tek istekte 1–200 çağrı) | [`POST /v1/calls/bulk`](api-reference/bulk-create-calls.md) |
 | Çağrı kayıtlarını almak — transcript, yapısal veri, ses kaydı | [`POST /v1/calls/list`](api-reference/list-calls/index.md) |
 | Tek bir çağrıyı kimliğiyle getirmek | [`GET /v1/calls/:callId`](api-reference/get-call.md) |

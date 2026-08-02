@@ -6,9 +6,9 @@ sidebar_position: 3
 
 # Filtreleme ve Sayfalama
 
-[`POST /v1/calls/list`](index.md) çağrılarını daraltma ve sayfalama ile ilgili her şey: `cursor`, `limit`, `from_date` ve `to_date` parametreleri.
+[`POST /v1/calls/list`](index.md) çağrılarını daraltma ve sayfalama ile ilgili her şey: `cursor`, `limit`, `date_from` ve `date_to` parametreleri; ayrıca `assistant_id`, `campaign_id` ve `call_bound_type` filtreleri.
 
-Çağrılar **en eskiden en yeniye** sırayla döner; sıralama, her çağrının size müsait hale geldiği ana göredir — çağrının başladığı zamana göre değil.
+Çağrılar **en yeniden en eskiye** sırayla döner; sıralama, her çağrının gerçekleştiği ana (başlangıç zamanına) göredir, çağrı kimliği ise eşitlik bozucudur.
 
 ---
 
@@ -16,19 +16,21 @@ sidebar_position: 3
 
 | İstek | Ne döner? |
 |---|---|
-| `from_date`, `to_date`, `cursor` ve `limit` yok | Asistana (veya squad'a) ait **en eski 100** müsait çağrı. Daha fazlası varsa `has_more` `true` olur ve `next_cursor` döner — sonraki 100 için onu geri gönderin. |
-| Yalnızca `limit` (örn. `500`) | Tek sayfada en eski *N* çağrı (en çok 500). |
-| Yalnızca `from_date` | `from_date` anından **itibaren** (dahil) müsait olan çağrılar, en eskiden başlayarak. `cursor` ile devam edin. |
-| Yalnızca `to_date` | `to_date` anından **kesinlikle önce** müsait olan çağrılar, en eskiden başlayarak. `cursor` ile devam edin. |
-| `from_date` + `to_date` | Yarı açık `[from_date, to_date)` aralığındaki çağrılar, en eskiden başlayarak. |
+| `date_from`, `date_to`, `cursor` ve `limit` yok | Şirketinize ait **en yeni 50** sonlanmış çağrı. Daha fazlası varsa `has_more` `true` olur ve `next_cursor` döner — sonraki 50 için onu geri gönderin. |
+| Yalnızca `limit` (örn. `200`) | Tek sayfada en yeni *N* çağrı (en çok 200). |
+| Yalnızca `date_from` | O günden itibaren (dahil) çağrılar, en yeniden başlayarak. `cursor` ile devam edin. |
+| Yalnızca `date_to` | O gün dahil olacak şekilde ve öncesindeki çağrılar, en yeniden başlayarak. `cursor` ile devam edin. |
+| `date_from` + `date_to` | İki ucu da dahil gün aralığındaki çağrılar, en yeniden başlayarak. |
 | Yukarıdakilerden herhangi biri **+ `cursor`** | Aynı sorgunun **sonraki sayfası**. Sayfalar arasında diğer tüm parametreleri aynı tutun — yalnızca `cursor` değişir. |
+
+**Diğer filtreler.** `assistant_id`, `campaign_id` ve `call_bound_type` (`inbound` / `outbound`) kapsamı daha da daraltır ve tarih aralığıyla ve birbirleriyle birlikte çalışır (mantıksal VE). `campaign_id`, [`POST /v1/calls/bulk`](../bulk-create-calls.md) yanıtında dönen `batch_call_id` değeridir. Bir gezinmenin her sayfasında aynı filtreleri gönderin.
 
 ---
 
 ## `limit`
 
-- Varsayılan **100**, en fazla **500**; her sayfaya uygulanır.
-- **1–500** aralığı dışındaki bir değer `400 VALIDATION_FAILED` ile reddedilir.
+- Varsayılan **50**, en fazla **200**; her sayfaya uygulanır.
+- **1–200** aralığı dışındaki bir değer `400 VALIDATION_FAILED` ile reddedilir.
 - `limit` yalnızca sayfa boyutunu belirler — toplamda kaç çağrı çekebileceğinizi **sınırlamaz**. Tümünü okumak için `cursor` ile sayfalamaya devam edin.
 
 ## `cursor` {#cursors}
@@ -36,23 +38,23 @@ sidebar_position: 3
 - **İlk** istekte göndermeyin.
 - Her yanıt bir `pagination.next_cursor` döner. `has_more` `true` olduğu sürece bu değeri `cursor` olarak geri gönderip sonraki sayfayı alın.
 - `has_more` `false` olunca durun (bu noktada `next_cursor` `null`'dır).
-- Cursor **opaktır** — oluşturmayın veya değiştirmeyin. Cursor ile sayfalarken **aynı `assistant_id`/`squad_id`, `from_date`, `to_date` ve `limit` değerlerini tekrar gönderin**; cursor yalnızca o sorgudaki konumunuzu işaretler.
-- Cursor değerlerini uzun süre (örneğin günlerce) saklamayın — tek bir senkronizasyon oturumu içinde kullanın. Düzenli/**artımlı** senkron için çalıştırmalar arasında cursor saklamayın; bunun yerine en son çektiğiniz noktayı hatırlayıp sonraki çalıştırmada `from_date` olarak gönderin. Cursor, *tek bir sorgunun içindeki* konumu işaretler; kalıcı bir watermark değildir. Bkz. [artımlı senkron rehberi](../../guides/incremental-sync.md).
+- Cursor, **opak** bir base64url anahtarıdır — `(started_at, çağrı kimliği)` üzerinde azalan sıralı bir keyset işaretçisi. Oluşturmayın veya çözmeyin. Cursor ile sayfalarken **aynı `assistant_id`, `campaign_id`, `call_bound_type`, `date_from`, `date_to` ve `limit` değerlerini tekrar gönderin**; cursor yalnızca o sorgudaki konumunuzu işaretler.
+- Cursor değerlerini uzun süre (örneğin günlerce) saklamayın — tek bir senkronizasyon oturumu içinde kullanın. Düzenli/**artımlı** senkron için çalıştırmalar arasında cursor saklamayın; bunun yerine en son çektiğiniz günü hatırlayıp sonraki çalıştırmada `date_from` olarak gönderin (ve bir gün tam olarak yeniden tarandığından `call_id` üzerinden tekilleştirin). Cursor, *tek bir sorgunun içindeki* konumu işaretler; kalıcı bir watermark değildir. Bkz. [artımlı senkron rehberi](../../guides/incremental-sync.md).
 
 ```bash
 # İlk istek (cursor yok)
-curl -X POST https://api-vindy.vinter.me/v1/calls/list \
+curl -X POST https://api.vindy.ai/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"assistant_id":7,"limit":100}'
+  -d '{"assistant_id":"8f3a1c20-4d3f-4a8b-bc12-5e6f7a8b9c01","limit":50}'
 
 # Yanıt: { "data": [...], "pagination": { "next_cursor": "X", "has_more": true } }
 
 # Sonraki istek (next_cursor değerini kullanın)
-curl -X POST https://api-vindy.vinter.me/v1/calls/list \
+curl -X POST https://api.vindy.ai/v1/calls/list \
   -H "Authorization: Bearer $VINDY_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"assistant_id":7,"limit":100,"cursor":"X"}'
+  -d '{"assistant_id":"8f3a1c20-4d3f-4a8b-bc12-5e6f7a8b9c01","limit":50,"cursor":"X"}'
 
 # has_more: false olunca durun
 ```
@@ -61,7 +63,7 @@ Cursor hataları:
 
 | Durum | Kod | Anlamı |
 |---|---|---|
-| `400` | `INVALID_CURSOR` | Cursor çözümlenemedi. Önceki bir yanıttan alınan güncel bir cursor kullanın. |
+| `400` | `INVALID_CURSOR` | Cursor boş veya çözümlenemedi. Önceki bir yanıttan alınan güncel bir cursor kullanın. |
 | `400` | `MALFORMED_CURSOR` | Cursor içeriği beklenen yapıda değil. Cursor'u değiştirmeyin — döndürüldüğü biçimde kullanın. |
 
 ## Sayfalama nesnesi {#paginated}
@@ -72,9 +74,9 @@ Her sayfa aynı yapıyla sarmalanır:
 {
   "data": [ /* çağrılar */ ],
   "pagination": {
-    "next_cursor": "eyJ0IjoiMjAyNi0wNS0xNVQxMDozMToyOC4wMDBaIiwiaSI6MTIzNDZ9",
+    "next_cursor": "eyJ0IjoiMjAyNi0wNS0xNVQxMTowMjoxMCswMDowMCIsImkiOiJzZXNzXzZhNGIwZDNjMmY4MSJ9",
     "has_more": true,
-    "limit": 100
+    "limit": 50
   }
 }
 ```
@@ -88,115 +90,82 @@ Her sayfa aynı yapıyla sarmalanır:
 
 ---
 
-## Tarihler: `from_date` / `to_date` {#range-semantics}
+## Tarihler: `date_from` / `date_to` {#range-semantics}
 
-İki parametre de bir çağrının size müsait hale geldiği anı, yarı açık **`[from_date, to_date)`** aralığında filtreler:
+İki parametre de **yalnızca tarih** içeren `YYYY-MM-DD` değerleridir ve her ikisi de **iki ucu dahil tam günlerdir**:
 
-- `from_date` **dahildir** (>=) — "bu andan itibaren"
-- `to_date` **hariçtir** (`<`) — "bu ana kadar, bu an dahil değil"
+- `date_from` — dahil edilen ilk gün ("bu günden itibaren")
+- `date_to` — dahil edilen son gün ("bu güne kadar, bu gün dahil")
 
-Ardışık aralıklar çakışmadan ve boşluk bırakmadan zincirlenir. Birini tek başına ya da ikisini birlikte gönderebilir; en baştan taramak için ikisini de boş bırakabilirsiniz.
+Günler **Europe/Istanbul** dilimine göre yorumlanır (yıl boyunca sabit UTC+3; yaz/kış saati yoktur). İçeride aralık, İstanbul saatiyle `[date_from 00:00, (date_to + 1 gün) 00:00)`'dır; böylece her iki ucun yerel günü tam olarak kapsanır.
 
-**Yalnızca tarih içeren `to_date` için kolaylık**: `to_date=2026-05-23` (sadece tarih), otomatik olarak `< 2026-05-24T00:00:00Z`'ye genişletilir; böylece **23 Mayıs gününün tamamı dahil** olur.
+Birini tek başına ya da ikisini birlikte gönderebilir; en baştan taramak için ikisini de boş bırakabilirsiniz. `date_from`'un `date_to`'dan sonra olması `DATE_RANGE_INVALID` (400) ile reddedilir.
 
-`from_date >= to_date` durumu `DATE_RANGE_INVALID` (400) ile reddedilir.
+### Kabul edilen biçim
 
-### Kabul edilen biçimler
-
-Tüm datetime değerleri **UTC referansıyla ISO 8601** biçimindedir.
+Kabul edilen tek bir biçim vardır — düz bir takvim tarihi:
 
 | Biçim | Örnek | Anlamı |
 |---|---|---|
-| Yalnızca tarih | `2026-05-23` | UTC gününün başlangıcı (`00:00:00`) |
-| UTC datetime | `2026-05-23T15:30:00Z` | UTC 15:30 |
-| Milisaniye duyarlıklı UTC | `2026-05-23T15:30:00.123Z` | UTC 15:30 ve 123 milisaniye |
-| Offset'li datetime | `2026-05-23T15:30:00+03:00` | Türkiye saatiyle 15:30 (= UTC 12:30) |
+| Tarih (`YYYY-MM-DD`) | `2026-05-23` | 23 Mayıs gününün tamamı, Europe/Istanbul dilimiyle |
+
+Girişte saat veya saat dilimi bileşeni **yoktur** — bir gün gönderirsiniz, İstanbul gün sınırlarını sunucu sizin için uygular.
 
 ### Reddedilen biçimler
 
 | Biçim | Hata Kodu | Sorun |
 |---|---|---|
-| `2026-05-23 15:30:00` | `INVALID_DATE_FORMAT` | `T` ayracı yerine boşluk |
-| `2026-05-23T15:30:00` | `MISSING_TIMEZONE` | Saat dilimi yok (`Z` veya offset gerekir) |
-| `05/23/2026` | `INVALID_DATE_FORMAT` | ISO 8601 değil — yıl/ay/gün sırası belirsiz |
-| `23-05-2026` | `INVALID_DATE_FORMAT` | GG-AA-YYYY ISO 8601 değil |
+| `2026-05-23T15:30:00Z` | `INVALID_DATE_FORMAT` | Saat bileşeni var — yalnızca tarih gönderin |
+| `2026-05-23 15:30:00` | `INVALID_DATE_FORMAT` | Düz bir tarih değil |
+| `05/23/2026` | `INVALID_DATE_FORMAT` | `YYYY-MM-DD` değil — sıra belirsiz |
+| `23-05-2026` | `INVALID_DATE_FORMAT` | GG-AA-YYYY kabul edilmez |
 | `2026-13-01` | `INVALID_DATE_FORMAT` | Geçersiz ay (13) |
 | `2026-02-30` | `INVALID_DATE_FORMAT` | Geçersiz gün (30 Şubat) |
 
-Reddedilen her değer, yukarıdaki hata koduyla birlikte yapılandırılmış bir 400 döner; makine-okunabilir ayrıntı (`extensions.details` içinde) ilgili alanı, gönderdiğiniz değeri ve örnek biçimleri içerir. Bkz. [Hata Kodları kataloğu](../../errors.md).
-
-### Türkiye saatinin kullanımı {#turkey-time}
-
-Türkiye, yıl boyunca sabit biçimde **UTC+3** dilimindedir; yaz/kış saati yoktur. Aynı anı belirtmenin üç eşdeğer yolu vardır:
-
-```
-A) Offset belirterek, Türkiye saatiyle (önerilen):
-   "2026-05-23T15:30:00+03:00"
-
-B) UTC'ye dönüştürerek (Türkiye saatinden 3 saat çıkararak):
-   "2026-05-23T12:30:00Z"
-
-C) UTC'ye dönüştürüp offset'i açıkça yazarak:
-   "2026-05-23T12:30:00+00:00"
-```
-
-**Üçü de aynı ana işaret eder.** Hangisini gönderirseniz gönderin, sunucu değeri UTC'ye normalleştirir.
+Reddedilen her değer, yukarıdaki hata koduyla birlikte yapılandırılmış bir 400 döner. Bkz. [Hata Kodları kataloğu](../../errors.md).
 
 ### Geçerli aralıklar
 
-| Girdi | Geçerli Aralık (UTC) |
+| Girdi | Geçerli Aralık (Europe/Istanbul) |
 |---|---|
-| `from_date=2026-05-23` | `>= 2026-05-23T00:00:00Z` |
-| `to_date=2026-05-23` (kolaylık) | `< 2026-05-24T00:00:00Z` |
-| `from=2026-05-23` + `to=2026-05-23` | 23 Mayıs gününün tamamı (UTC) |
-| `from_date=2026-05-23T15:00:00+03:00` | `>= 2026-05-23T12:00:00Z` |
-| `to_date=2026-05-23T18:00:00Z` | `< 2026-05-23T18:00:00Z` (kesin) |
-| `from=2026-05-23T09:00:00+03:00` + `to=2026-05-23T17:00:00+03:00` | Türkiye mesai saatleri (UTC 06:00 — 14:00) |
+| `date_from=2026-05-23` | `2026-05-23 00:00`'dan itibaren |
+| `date_to=2026-05-23` | `2026-05-23` boyunca (`< 2026-05-24 00:00`) |
+| `date_from=2026-05-23` + `date_to=2026-05-23` | 23 Mayıs gününün tamamı |
+| `date_from=2026-05-01` + `date_to=2026-05-31` | Mayıs ayının tamamı |
 
 ---
 
 ## Reçeteler
 
-**Tek bir gün** — date-only `to_date` kolaylığı 23 Mayıs'ın tamamını kapsar:
+**Tek bir gün** — iki uç da dahil, yani 23 Mayıs'ın tamamı:
 
 ```json
-{ "assistant_id": 7, "from_date": "2026-05-23", "to_date": "2026-05-23" }
+{ "assistant_id": "8f3a1c20-4d3f-4a8b-bc12-5e6f7a8b9c01", "date_from": "2026-05-23", "date_to": "2026-05-23" }
 ```
 
-**Bir takvim ayı** — `to_date` hariç olduğundan, Haziran'a taşmadan 1–31 Mayıs:
+**Bir takvim ayı** — iki uç da dahil, yani 1–31 Mayıs:
 
 ```json
-{ "assistant_id": 7, "from_date": "2026-05-01", "to_date": "2026-06-01" }
+{ "assistant_id": "8f3a1c20-4d3f-4a8b-bc12-5e6f7a8b9c01", "date_from": "2026-05-01", "date_to": "2026-05-31" }
 ```
 
-**Türkiye mesai saatleri:**
+**Belirli bir günden bu yana her şey** — "şu ana kadar" için `date_to`'yu boş bırakın:
 
 ```json
-{
-  "assistant_id": 7,
-  "from_date": "2026-05-23T09:00:00+03:00",
-  "to_date": "2026-05-23T17:00:00+03:00"
-}
+{ "assistant_id": "8f3a1c20-4d3f-4a8b-bc12-5e6f7a8b9c01", "date_from": "2026-05-23" }
 ```
 
-**Belirli bir andan bu yana her şey** — "şu ana kadar" için `to_date`'i boş bırakın:
+**Aralıkları çakışmadan zincirleme** — iki uç da dahil olduğundan, bir aralığın `date_to`'su ile bir sonrakinin `date_from`'u **ardışık günler** olmalı, asla aynı gün olmamalıdır:
 
 ```json
-{ "assistant_id": 7, "from_date": "2026-05-23T11:00:00.000Z" }
-```
-
-**Aralıkları boşluksuz zincirleme** — aralıklar yarı açık olduğundan, bir aralığın `to_date`'i bir sonrakinin `from_date`'i olabilir; hiçbir kayıt iki kez sayılmaz, hiçbiri atlanmaz:
-
-```json
-{ "from_date": "2026-05-23T00:00:00Z", "to_date": "2026-05-24T00:00:00Z" }
-{ "from_date": "2026-05-24T00:00:00Z", "to_date": "2026-05-25T00:00:00Z" }
+{ "date_from": "2026-05-01", "date_to": "2026-05-23" }
+{ "date_from": "2026-05-24", "date_to": "2026-05-31" }
 ```
 
 ### Sık yapılan hatalar
 
 | Gönderdiğiniz | Sonuç |
 |---|---|
-| `"2026-05-23 15:30:00"` (boşluk) | `400 INVALID_DATE_FORMAT` — `T` kullanın |
-| `"2026-05-23T15:30:00"` (saat dilimi yok) | `400 MISSING_TIMEZONE` — `Z` veya `+03:00` ekleyin |
-| `from_date`, `to_date`'den sonra | `400 DATE_RANGE_INVALID` |
-| `"23-05-2026"` veya `"05/23/2026"` | `400 INVALID_DATE_FORMAT` — yalnızca ISO 8601 |
+| `"2026-05-23T15:30:00Z"` (saat var) | `400 INVALID_DATE_FORMAT` — tarihler yalnızca gün (`YYYY-MM-DD`) |
+| `"23-05-2026"` veya `"05/23/2026"` | `400 INVALID_DATE_FORMAT` — yalnızca `YYYY-MM-DD` |
+| `date_from`, `date_to`'dan sonra | `400 DATE_RANGE_INVALID` |

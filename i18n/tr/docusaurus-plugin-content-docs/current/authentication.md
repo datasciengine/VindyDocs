@@ -25,7 +25,7 @@ Authorization: Bearer <api-key>
 **Örnek:**
 
 ```
-01902f6e-7c5a-7000-8000-abc123def456.R3vP9LkX2nM8jY7fW1qZ4tH6cB0sN5aDmGuI3oV
+01902f6e-7c5a-7000-8000-abc123def456.R3vP9LkX2nM8jY7fW1qZ4tH6cB0sN5aDmGuI3oVpQ7r
 ```
 
 ---
@@ -62,23 +62,14 @@ Tüm hata yanıtları aynı JSON yapısını paylaşır; ayrıntılar için [Yan
 **Örnek — eksik header:**
 
 ```bash
-curl -i https://api-vindy.vinter.me/v1/assistants
+curl -i https://api.vindy.ai/v1/assistants
 ```
 
 ```json
 {
-  "statusCode": 401,
-  "timestamp": "2026-06-03T12:34:56.789Z",
-  "path": "/v1/assistants",
-  "requestId": "01902f6e-7c5a-7000-8000-abc123",
-  "code": "MISSING_AUTH_HEADER",
   "message": "Authorization header is missing.",
   "extensions": {
-    "code": "MISSING_AUTH_HEADER",
-    "statusCode": 401,
-    "timestamp": "2026-06-03T12:34:56.789Z",
-    "path": "/v1/assistants",
-    "requestId": "01902f6e-7c5a-7000-8000-abc123"
+    "code": "MISSING_AUTH_HEADER"
   }
 }
 ```
@@ -89,4 +80,4 @@ curl -i https://api-vindy.vinter.me/v1/assistants
 
 | Ortam | Base URL |
 |---|---|
-| Production | `https://api-vindy.vinter.me` |
+| Production | `https://api.vindy.ai` |

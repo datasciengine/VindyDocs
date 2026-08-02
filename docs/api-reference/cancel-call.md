@@ -9,16 +9,20 @@ import TabItem from '@theme/TabItem';
 
 # `POST /v1/calls/:callId/cancel`
 
-Cancels a single **pending** (not-yet-dialed) call. You can only cancel your own company's calls.
+Cancels a single **queued** outbound call — one that is still `pending` or `scheduled` and has not yet been dialed. You can only cancel your own company's calls.
 
-A call can only be cancelled while it is still pending. Calls that are already being dialed, or that have finished, cannot be cancelled.
+A call can only be cancelled while it is still waiting in the queue. Once it has been dispatched (is being dialed) or has finished, it can no longer be cancelled.
+
+:::note Where the `callId` comes from
+The path takes the `call_id` of a **queued outbound** call — one of the ids returned in the `calls[]` array of [`POST /v1/calls/bulk`](bulk-create-calls.md). Only calls still waiting in the queue can be cancelled; to cancel every remaining call in a batch at once, use [`POST /v1/calls/batches/:batchId/cancel`](cancel-batch.md).
+:::
 
 ---
 
 ## Request
 
 ```http
-POST https://api-vindy.vinter.me/v1/calls/12345/cancel
+POST https://api.vindy.ai/v1/calls/7b910f3a-2c4d-4e8b-a1f2-9c3d5e6f7a8b/cancel
 Authorization: Bearer <api-key>
 ```
 
@@ -28,34 +32,37 @@ No request body.
 
 | Parameter | Type | Description |
 |---|---|---|
-| `callId` | int | The call's numeric ID. |
+| `callId` | string | The `call_id` of the queued call to cancel (from the bulk `calls[]` response). |
 
 ## Response (200 OK)
 
 ```json
-{ "id": 12345 }
+{ "call_id": "7b910f3a-2c4d-4e8b-a1f2-9c3d5e6f7a8b", "status": "cancelled" }
 ```
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | int | The ID of the cancelled call. |
+| `call_id` | string | The id of the cancelled call (the `callId` you passed in). |
+| `status` | string | Always `cancelled` on success. |
 
 ## Errors
 
 | Status | Code | Description |
 |---|---|---|
-| `400` | `VALIDATION_FAILED` | `callId` is not a positive integer. |
-| `400` | `ERR_CALL_NOT_FOUND` | Call not found or not in your company. |
-| `400` | `ERR_CALL_ALREADY_FINAL` | Call is already final (completed, failed, or cancelled). |
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Auth errors. |
-| `409` | `ERR_CALL_PROCESSING_CANCEL` | The call is currently being dialed and can no longer be cancelled. |
+| `404` | `RESOURCE_NOT_FOUND` | No such call, or it belongs to another company. |
+| `409` | `ERR_CALL_NOT_CANCELLABLE` | The call cannot be cancelled: it is not a queued outbound call. Either it has already been dispatched or finished, a race occurred, or it is an **inbound / already-started call** (which can never be cancelled). |
 
 :::note When cancellation is no longer possible
-A call moves quickly from pending to being dialed. If you receive `409 ERR_CALL_PROCESSING_CANCEL`, the call has already started and cannot be stopped via the API. Once it ends you'll see its outcome through [`POST /v1/calls/list`](list-calls/index.md), [`GET /v1/calls/:callId`](get-call.md), or a [webhook event](webhooks.md).
+A queued call moves quickly from waiting to being dialed. If you receive `409 ERR_CALL_NOT_CANCELLABLE`, the call has already left the queue and cannot be stopped via the API. Once it ends you'll see its outcome through [`POST /v1/calls/list`](list-calls/index.md), [`GET /v1/calls/:callId`](get-call.md), or a [webhook event](webhooks.md).
+:::
+
+:::note A cancelled call emits a `call-ended` webhook
+If you have a webhook subscription, cancelling a single queued call emits a [`call-ended`](webhooks.md#call-ended) event with `call_status: "cancelled"` and a minimal body (no transcript or recording) — this is how you confirm the cancellation asynchronously. Cancelling a whole batch instead emits **one** [`batch-ended`](webhooks.md#batch-ended) event, not a `call-ended` per call.
 :::
 
 :::tip Cancelling a whole batch
-To cancel many pending calls at once — for example every remaining call in a bulk batch — use [`POST /v1/calls/batches/:batchId/cancel`](cancel-batch.md) with the `batch_call_id` from your bulk request, instead of cancelling each call individually.
+To cancel many queued calls at once — for example every remaining call in a bulk batch — use [`POST /v1/calls/batches/:batchId/cancel`](cancel-batch.md) with the `batch_call_id` from your bulk request, instead of cancelling each call individually.
 :::
 
 ## Examples
@@ -64,9 +71,9 @@ To cancel many pending calls at once — for example every remaining call in a b
 <TabItem value="curl" label="curl">
 
 ```bash
-curl -X POST https://api-vindy.vinter.me/v1/calls/12345/cancel \
+curl -X POST https://api.vindy.ai/v1/calls/7b910f3a-2c4d-4e8b-a1f2-9c3d5e6f7a8b/cancel \
   -H "Authorization: Bearer $VINDY_API_KEY"
-# → { "id": 12345 }
+# → { "call_id": "7b910f3a-2c4d-4e8b-a1f2-9c3d5e6f7a8b", "status": "cancelled" }
 ```
 
 </TabItem>
@@ -75,7 +82,7 @@ curl -X POST https://api-vindy.vinter.me/v1/calls/12345/cancel \
 ```javascript
 async function cancelCall(callId) {
   const response = await fetch(
-    `https://api-vindy.vinter.me/v1/calls/${callId}/cancel`,
+    `https://api.vindy.ai/v1/calls/${callId}/cancel`,
     {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.VINDY_API_KEY}` },
@@ -84,17 +91,17 @@ async function cancelCall(callId) {
 
   if (!response.ok) {
     const error = await response.json();
-    if (error.code === "ERR_CALL_PROCESSING_CANCEL") {
-      return false; // too late — the call is already being dialed
+    if (error.extensions?.code === "ERR_CALL_NOT_CANCELLABLE") {
+      return false; // too late — the call already left the queue
     }
-    throw new Error(`${error.code}: ${error.message}`);
+    throw new Error(`${error.extensions?.code}: ${error.message}`);
   }
 
-  const { id } = await response.json();
-  return id === callId;
+  const { status } = await response.json();
+  return status === "cancelled";
 }
 
-await cancelCall(12345);
+await cancelCall("7b910f3a-2c4d-4e8b-a1f2-9c3d5e6f7a8b");
 ```
 
 </TabItem>
@@ -106,19 +113,20 @@ import requests
 
 def cancel_call(call_id):
     response = requests.post(
-        f"https://api-vindy.vinter.me/v1/calls/{call_id}/cancel",
+        f"https://api.vindy.ai/v1/calls/{call_id}/cancel",
         headers={"Authorization": f"Bearer {os.environ['VINDY_API_KEY']}"},
     )
 
     if not response.ok:
         error = response.json()
-        if error.get("code") == "ERR_CALL_PROCESSING_CANCEL":
-            return False  # too late — the call is already being dialed
-        raise RuntimeError(f"{error.get('code')}: {error.get('message')}")
+        code = error.get("extensions", {}).get("code")
+        if code == "ERR_CALL_NOT_CANCELLABLE":
+            return False  # too late — the call already left the queue
+        raise RuntimeError(f"{code}: {error.get('message')}")
 
-    return response.json()["id"] == call_id
+    return response.json()["status"] == "cancelled"
 
-cancel_call(12345)
+cancel_call("7b910f3a-2c4d-4e8b-a1f2-9c3d5e6f7a8b")
 ```
 
 </TabItem>

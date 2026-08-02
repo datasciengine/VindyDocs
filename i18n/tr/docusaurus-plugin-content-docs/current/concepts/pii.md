@@ -28,4 +28,5 @@ Kendi sistemlerinize kopyaladığınız verilere ilişkin saklama, silme ve anon
 
 - Yalnızca gerçekten ihtiyaç duyduğunuz alanları senkronize etmeniz önerilir.
 - İndirdiğiniz transcript'lere ve ses kayıtlarına kendi saklama politikanızı uygulamanız önerilir.
+- Kayıt indirme bağlantıları geçicidir — varsayılan olarak yaklaşık 24 saat (86400 saniye) geçerlidir ve yapılandırılabilir. Bağlantıyı değil, indirdiğiniz ses dosyasını saklayın.
 - Ses kayıtlarını kendi kullanıcılarınıza iletecekseniz, tek bir bağlantıyı paylaşmak yerine her kullanıcı için ayrı bir indirme bağlantısı oluşturun; bkz. [kayıt indirme rehberi](../guides/recording-retrieval.md).
