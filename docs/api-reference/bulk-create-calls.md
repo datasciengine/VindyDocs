@@ -89,7 +89,7 @@ Because Vindy never interprets `metadata`, it is the right place for **your** co
 
 ### Variables {#variables}
 
-`variables` are **template values** the assistant uses **during the call**. Wherever the assistant's prompt or greeting contains a `{{name}}` placeholder, Vindy substitutes the value you send for `name` before the call starts — so a greeting like *"Hello {{first_name}}, this is a reminder for {{appointment_time}}"* is personalized per call.
+`variables` are **template values** the assistant uses **during the call**. Wherever the assistant's prompt or greeting contains a `{{name}}` placeholder, Vindy substitutes the value you send for `name` before the call starts — so a greeting like `"Hello {{first_name}}, this is a reminder for {{appointment_time}}"` is personalized per call.
 
 This is the opposite of `metadata`: `metadata` is opaque and **never affects the call**, while `variables` **change what the assistant says**. Send `variables`, not `metadata`, for anything the assistant should speak.
 

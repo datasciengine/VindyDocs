@@ -89,7 +89,7 @@ Vindy `metadata`'yı asla yorumlamadığı için, burası **sizin** eşleştirme
 
 ### Değişkenler {#variables}
 
-`variables`, asistanın **çağrı sırasında** kullandığı **şablon değerleridir**. Asistanın prompt'unda veya karşılama (greeting) metninde nerede bir `{{name}}` yer tutucusu varsa, Vindy çağrı başlamadan önce `name` için gönderdiğiniz değeri yerine koyar — böylece *"Merhaba {{first_name}}, {{appointment_time}} için bir hatırlatmadır"* gibi bir karşılama her çağrı için kişiselleştirilir.
+`variables`, asistanın **çağrı sırasında** kullandığı **şablon değerleridir**. Asistanın prompt'unda veya karşılama (greeting) metninde nerede bir `{{name}}` yer tutucusu varsa, Vindy çağrı başlamadan önce `name` için gönderdiğiniz değeri yerine koyar — böylece `"Merhaba {{first_name}}, {{appointment_time}} için bir hatırlatmadır"` gibi bir karşılama her çağrı için kişiselleştirilir.
 
 Bu, `metadata`'nın tam tersidir: `metadata` opaktır ve **çağrıyı asla etkilemez**, oysa `variables` **asistanın söylediğini değiştirir**. Asistanın söylemesi gereken her şey için `metadata` değil `variables` gönderin.
 
