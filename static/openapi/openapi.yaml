@@ -584,7 +584,7 @@ components:
 
     PhoneNumber:
       type: object
-      required: [phone_number_id, phone_number, provider]
+      required: [phone_number_id, phone_number]
       properties:
         phone_number_id:
           type: string
@@ -597,9 +597,6 @@ components:
         label:
           type: [string, 'null']
           description: Human-friendly name for the line, or null when none is set.
-        provider:
-          type: string
-          description: Underlying carrier/provider — e.g. netgsm, manual.
 
     PhoneNumbersResponse:
       type: object

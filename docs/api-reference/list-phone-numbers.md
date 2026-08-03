@@ -32,8 +32,7 @@ No query parameters. The response is **not paginated** — every usable caller l
     {
       "phone_number_id": "2a80da64-32dc-4837-b880-e6dc9ccd632d",
       "phone_number": "+902323323389",
-      "label": "3389",
-      "provider": "netgsm"
+      "label": "3389"
     }
   ],
   "total": 1
@@ -56,7 +55,6 @@ No query parameters. The response is **not paginated** — every usable caller l
 | `phone_number_id` | string | Stable, opaque id of the caller line. Pass it as `phone_number_id` when launching a batch of outbound calls with [`POST /v1/calls/bulk`](bulk-create-calls.md). |
 | `phone_number` | string | The line in E.164 form (e.g. `+902323323389`). |
 | `label` | string \| null | A human-friendly name for the line, or `null` when none is set. |
-| `provider` | string | The underlying carrier/provider — e.g. `netgsm`, `manual`. |
 
 ## Errors
 

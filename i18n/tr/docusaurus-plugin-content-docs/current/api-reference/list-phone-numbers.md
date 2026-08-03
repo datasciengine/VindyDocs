@@ -32,8 +32,7 @@ Sorgu parametresi yoktur. Yanıt **sayfalanmaz** — kullanılabilir tüm arayan
     {
       "phone_number_id": "2a80da64-32dc-4837-b880-e6dc9ccd632d",
       "phone_number": "+902323323389",
-      "label": "3389",
-      "provider": "netgsm"
+      "label": "3389"
     }
   ],
   "total": 1
@@ -56,7 +55,6 @@ Sorgu parametresi yoktur. Yanıt **sayfalanmaz** — kullanılabilir tüm arayan
 | `phone_number_id` | string | Arayan hattın kalıcı, opak kimliği. [`POST /v1/calls/bulk`](bulk-create-calls.md) ile toplu giden çağrı başlatırken `phone_number_id` olarak gönderin. |
 | `phone_number` | string | Hattın E.164 biçimi (örneğin `+902323323389`). |
 | `label` | string \| null | Hat için okunabilir bir ad; ayarlanmamışsa `null`. |
-| `provider` | string | Alttaki operatör/sağlayıcı — örneğin `netgsm`, `manual`. |
 
 ## Hatalar
 
