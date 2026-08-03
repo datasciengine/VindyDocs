@@ -48,6 +48,7 @@ Authorization: Bearer <api-key>
 | `404` | `RESOURCE_NOT_FOUND` | Call not found, a browser (WebRTC) call, or not in your company. |
 | `404` | `RECORDING_NOT_AVAILABLE` | The call exists, but no recording was ever produced for it. **Terminal** — retrying does not help. |
 | `409` | `RECORDING_NOT_READY` | A recording exists but is not downloadable yet. Rare race condition — retry in a few minutes. |
+| `429` | `RATE_LIMITED` | Rate limit exceeded (per-minute). Retry after `Retry-After` seconds. |
 
 **404 example — no recording was produced (terminal):**
 

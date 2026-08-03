@@ -102,6 +102,7 @@ Parametrelerin tam referansı, kabul edilen tarih biçimleri ve hazır reçetele
         "would_recommend": true
       },
       "call_metadata": { "crm_contact_id": "CNT-90412" },
+      "call_variables": { "first_name": "Batu" },
       "call_recording": {
         "available": true,
         "url": "https://...",
@@ -123,6 +124,7 @@ Parametrelerin tam referansı, kabul edilen tarih biçimleri ve hazır reçetele
       "call_transcript": "[11:02:10] Asistan: Merhaba, ben Vindy; müşteri memnuniyeti anketi için arıyorum. Şu an uygun musunuz?\n[11:02:16] Müşteri: Pardon, yanlış numara.",
       "call_structured_data": null,
       "call_metadata": null,
+      "call_variables": { "first_name": "Batu" },
       "call_recording": {
         "available": false
       }
@@ -172,6 +174,7 @@ Liste yalnızca başarılı görüşmeleri değil; `completed` çağrıların ya
   "call_transcript": null,
   "call_structured_data": null,
   "call_metadata": { "crm_contact_id": "CNT-90418" },
+  "call_variables": { "first_name": "Batu" },
   "call_recording": { "available": false }
 }
 ```
@@ -204,6 +207,7 @@ Liste yalnızca başarılı görüşmeleri değil; `completed` çağrıların ya
 | `call_transcript` | string \| null | Görüşmenin düz metin dökümü. Her satır `[HH:MM:SS] Asistan:` (asistan, `Asistan`) veya `[HH:MM:SS] Müşteri:` (arayan, `Müşteri`) biçimindedir — Türkçe rol etiketleri, önlerinde UTC `HH:MM:SS` zaman damgasıyla — ve satırlar `\n` ile ayrılır. Çok kısa veya başarısız çağrılarda boş ya da null olabilir. |
 | `call_structured_data` | object \| null | Yapay zekânın çıkardığı veri; asistanınızın yapısal çıktı şemasının özellikleriyle anahtarlanan düz (flat) bir nesne olarak döner — bkz. [Yapısal veri şekilleri](#structured-data-shapes). Asistanın yapısal çıktı şeması yoksa, hiçbir şey çıkarılamadığında (veya saklanan veri ayrıştırılamadığında) `null`. |
 | `call_metadata` | object \| null | Çağrıyı [`POST /v1/calls/bulk`](../bulk-create-calls.md) ile oluştururken eklediğiniz metadata; korelasyon için size aynen geri döner. Çağrı metadata olmadan oluşturulduysa `null`. Kurallar için bkz. [Metadata](../bulk-create-calls.md#metadata). |
+| `call_variables` | obje \| null | Bu çağrı için gönderilen şablon değişkenleri, aynen geri döner — çağrıyı oluştururken `variables` olarak gönderdiğiniz obje. Gönderilmediyse (ör. inbound çağrılar) `null`. |
 | `call_recording` | object | Ses kaydı durumu ve bağlantısı (aşağıda). |
 
 **`call_recording` nesnesi**

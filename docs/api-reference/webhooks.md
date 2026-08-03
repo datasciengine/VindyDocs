@@ -84,6 +84,7 @@ X-Vindy-Delivery-Id: 0190aa00-1c5a-7000-8000-abc123def456
       "would_recommend": true
     },
     "call_metadata": { "crm_contact_id": "CNT-90412" },
+    "call_variables": { "first_name": "Batu" },
     "call_recording": {
       "available": true,
       "url": "https://your-bucket.s3.eu-central-1.amazonaws.com/call-records/...wav?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=86400&X-Amz-Signature=...",
@@ -131,6 +132,7 @@ X-Vindy-Delivery-Id: 0190aa00-1c5a-7000-8000-abc123def456
 | `call_transcript` | string \| null | Plain-text transcript. Each line is `[HH:MM:SS] Asistan:` (assistant, `Asistan`) or `[HH:MM:SS] Müşteri:` (caller, `Müşteri`) — Turkish role labels prefixed with a UTC `HH:MM:SS` timestamp — separated by newlines (`\n`). May be empty or `null` for very short or failed calls. |
 | `call_structured_data` | object \| null | AI-extracted data, returned as a flat object whose keys are your assistant's structured output schema properties. `null` when the assistant has no structured output schema or nothing could be extracted — see [Structured data shapes](list-calls/index.md#structured-data-shapes). |
 | `call_metadata` | object \| null | The opaque metadata you sent via [`POST /v1/calls/bulk`](bulk-create-calls.md), echoed back verbatim for correlation. `null` if the call wasn't created with metadata. |
+| `call_variables` | object \| null | The template variables sent for this call, echoed back verbatim — the same object you passed as `variables` when creating the call. `null` when none were sent (e.g. inbound calls). |
 | `call_recording` | object | Recording availability + URL — fields below. |
 
 **`data.call_recording`**
@@ -169,6 +171,7 @@ When you cancel a **single** queued call via [`POST /v1/calls/:callId/cancel`](c
     "call_transcript": null,
     "call_structured_data": null,
     "call_metadata": { "crm_contact_id": "CNT-90412" },
+    "call_variables": { "first_name": "Batu" },
     "call_recording": { "available": false }
   }
 }

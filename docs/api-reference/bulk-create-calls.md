@@ -153,6 +153,7 @@ When a `batch_call_id` was returned (a multi-call batch), page through its calls
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Auth errors. |
 | `404` | `ASSISTANT_NOT_FOUND` | Assistant not found, not in your company, or not callable. |
 | `404` | `PHONE_NUMBER_NOT_FOUND` | The `phone_number_id` is unknown, malformed, or not in your company. Pick one from [`GET /v1/phone-numbers`](list-phone-numbers.md). |
+| `429` | `RATE_LIMITED` | Rate limit exceeded (per-minute). Retry after `Retry-After` seconds. |
 
 :::caution Atomic request
 If **any** number or metadata in the request is invalid, **no calls are created** — the whole request is rejected. Fix the offending entry (see `extensions.index`) and resubmit.

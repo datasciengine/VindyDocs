@@ -66,6 +66,7 @@ Batch özetini ve ayrıca `cancelled_now` değerini — bu isteğin az önce ipt
 |---|---|---|
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Kimlik doğrulama hataları. |
 | `404` | `RESOURCE_NOT_FOUND` | Batch bulunamadı veya sizin şirketinize ait değil. |
+| `429` | `RATE_LIMITED` | Dakika-başı istek limiti aşıldı; `Retry-After` saniye sonra tekrar deneyin. |
 
 :::note Yalnızca kuyruktaki çağrılar etkilenir
 Bu endpoint, henüz başlamamış çağrıları durdurur. Halihazırda devam eden çağrılar tamamlanana kadar sürer, bitmiş çağrılar değişmez. Dönen `cancelled_now`, bu istekle tam olarak kaç çağrının durdurulduğunu belirtir. Aynı batch üzerinde tekrar çağırırsanız güncel özet `cancelled_now: 0` ile döner.

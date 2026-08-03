@@ -76,6 +76,7 @@ The body is optional — send `{}` (or nothing) to get the first page with the d
         "would_recommend": true
       },
       "call_metadata": { "crm_contact_id": "CNT-90412" },
+      "call_variables": { "first_name": "Batu" },
       "call_recording": {
         "available": true,
         "url": "https://...?X-Amz-...",
@@ -121,6 +122,7 @@ This endpoint takes no `date_from` / `date_to` — it's scoped to one batch. Dat
 | `400` | `VALIDATION_FAILED` | `limit` is out of the 1–200 range, or the body has an unexpected field. |
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Auth errors. |
 | `404` | `RESOURCE_NOT_FOUND` | Batch not found or belongs to another company. |
+| `429` | `RATE_LIMITED` | Rate limit exceeded (per-minute). Retry after `Retry-After` seconds. |
 
 :::note Existence is not leaked
 A `batchId` that belongs to another company returns the same `404 RESOURCE_NOT_FOUND` as one that does not exist — the same rule as [`GET /v1/calls/:callId`](get-call.md). See [Multi-tenancy](../concepts/multi-tenancy.md).

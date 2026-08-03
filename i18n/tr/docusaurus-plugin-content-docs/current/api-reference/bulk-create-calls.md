@@ -153,6 +153,7 @@ Bir `batch_call_id` döndüyse (çok çağrılı bir batch), çağrılarını ta
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Kimlik doğrulama hataları. |
 | `404` | `ASSISTANT_NOT_FOUND` | Asistan bulunamadı, sizin şirketinize ait değil veya arama için uygun değil. |
 | `404` | `PHONE_NUMBER_NOT_FOUND` | `phone_number_id` bilinmiyor, hatalı biçimli veya şirketinize ait değil. [`GET /v1/phone-numbers`](list-phone-numbers.md) yanıtından birini seçin. |
+| `429` | `RATE_LIMITED` | Dakika-başı istek limiti aşıldı; `Retry-After` saniye sonra tekrar deneyin. |
 
 :::caution Atomik istek
 İstekteki **herhangi bir** numara veya metadata geçersizse **hiçbir çağrı oluşturulmaz** — tüm istek reddedilir. Hatalı kaydı düzeltip (bkz. `extensions.index`) yeniden gönderin.

@@ -57,6 +57,7 @@ Same shape as a [`POST /v1/calls/list`](list-calls/index.md) `data[]` item:
     "would_recommend": true
   },
   "call_metadata": { "crm_contact_id": "CNT-90412" },
+  "call_variables": { "first_name": "Batu" },
   "call_recording": {
     "available": true,
     "url": "https://...?X-Amz-...",
@@ -83,6 +84,7 @@ A queued outbound call returns this minimal shape until it completes:
   "call_transcript": null,
   "call_structured_data": null,
   "call_metadata": { "crm_contact_id": "CNT-90412" },
+  "call_variables": { "first_name": "Batu" },
   "call_recording": { "available": false }
 }
 ```
@@ -96,6 +98,7 @@ The call object has the **same fields** as a [List Calls](list-calls/index.md#re
 | `call_id` | string | The call's stable string id — the same value you pass in the path. |
 | `call_status` | string | For a terminal call, `completed` or `failed`. For an outbound call fetched while still queued or in progress, this is the queue status instead: `pending`, `scheduled`, `in_progress`, or `cancelled`. A physical call is never `cancelled` — a cancelled queued call simply never becomes one. |
 | `call_metadata` | object \| null | The metadata you sent via [`POST /v1/calls/bulk`](bulk-create-calls.md), echoed back verbatim. `null` if the call wasn't created with metadata. |
+| `call_variables` | object \| null | The template variables sent for this call, echoed back verbatim — the same object you passed as `variables` when creating the call. `null` when none were sent (e.g. inbound calls). |
 
 For every other field — `call_transcript`, `call_structured_data`, `call_recording`, the free-form `call_end_reason` string, and what `call_recording.available: false` means — see the full [List Calls field reference](list-calls/index.md#response-fields).
 
@@ -109,6 +112,7 @@ The `call_recording.url` returned here is generated **at request time** and is v
 |---|---|---|
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Auth errors. |
 | `404` | `RESOURCE_NOT_FOUND` | Call not found, an inbound call still in progress, a browser (WebRTC) call, or belongs to another company. (An outbound call you created returns `200` even while queued — see Visibility above.) |
+| `429` | `RATE_LIMITED` | Rate limit exceeded (per-minute). Retry after `Retry-After` seconds. |
 
 :::note Existence is not leaked
 A `call_id` that belongs to another company returns the same `404 RESOURCE_NOT_FOUND` as one that does not exist — see [Multi-tenancy](../concepts/multi-tenancy.md).

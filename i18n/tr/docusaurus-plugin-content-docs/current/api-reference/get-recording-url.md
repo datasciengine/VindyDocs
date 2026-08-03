@@ -48,6 +48,7 @@ Authorization: Bearer <api-key>
 | `404` | `RESOURCE_NOT_FOUND` | Çağrı bulunamadı, bir tarayıcı (WebRTC) çağrısı veya sizin şirketinize ait değil. |
 | `404` | `RECORDING_NOT_AVAILABLE` | Çağrı mevcut, ancak bu çağrı için hiç ses kaydı üretilmemiş. **Kalıcı** — yeniden denemek sonucu değiştirmez. |
 | `409` | `RECORDING_NOT_READY` | Ses kaydı var ama henüz indirilebilir değil. Nadir bir yarış koşulu — birkaç dakika sonra tekrar deneyin. |
+| `429` | `RATE_LIMITED` | Dakika-başı istek limiti aşıldı; `Retry-After` saniye sonra tekrar deneyin. |
 
 **404 örneği — hiç ses kaydı üretilmemiş (kalıcı):**
 

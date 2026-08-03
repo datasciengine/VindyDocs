@@ -76,6 +76,7 @@ Gövde opsiyoneldir — ilk sayfayı varsayılan limitle almak için `{}` (veya 
         "would_recommend": true
       },
       "call_metadata": { "crm_contact_id": "CNT-90412" },
+      "call_variables": { "first_name": "Batu" },
       "call_recording": {
         "available": true,
         "url": "https://...?X-Amz-...",
@@ -121,6 +122,7 @@ Bu endpoint `date_from` / `date_to` almaz — tek bir toplu aramayla sınırlıd
 | `400` | `VALIDATION_FAILED` | `limit` 1–200 aralığının dışında ya da gövdede beklenmeyen bir alan var. |
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Kimlik doğrulama hataları. |
 | `404` | `RESOURCE_NOT_FOUND` | Toplu arama bulunamadı veya başka bir şirkete ait. |
+| `429` | `RATE_LIMITED` | Dakika-başı istek limiti aşıldı; `Retry-After` saniye sonra tekrar deneyin. |
 
 :::note Varlık bilgisi sızdırılmaz
 Başka bir şirkete ait bir `batchId`, var olmayan bir kimlikle aynı `404 RESOURCE_NOT_FOUND` yanıtını döndürür — [`GET /v1/calls/:callId`](get-call.md) ile aynı kural. Bkz. [Çoklu kiracılık](../concepts/multi-tenancy.md).

@@ -52,6 +52,7 @@ No request body.
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Auth errors. |
 | `404` | `RESOURCE_NOT_FOUND` | No such call, or it belongs to another company. |
 | `409` | `ERR_CALL_NOT_CANCELLABLE` | The call cannot be cancelled: it is not a queued outbound call. Either it has already been dispatched or finished, a race occurred, or it is an **inbound / already-started call** (which can never be cancelled). |
+| `429` | `RATE_LIMITED` | Rate limit exceeded (per-minute). Retry after `Retry-After` seconds. |
 
 :::note When cancellation is no longer possible
 A queued call moves quickly from waiting to being dialed. If you receive `409 ERR_CALL_NOT_CANCELLABLE`, the call has already left the queue and cannot be stopped via the API. Once it ends you'll see its outcome through [`POST /v1/calls/list`](list-calls/index.md), [`GET /v1/calls/:callId`](get-call.md), or a [webhook event](webhooks.md).

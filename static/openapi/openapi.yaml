@@ -83,6 +83,8 @@ paths:
                 $ref: '#/components/schemas/AssistantsResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -107,6 +109,8 @@ paths:
                 $ref: '#/components/schemas/PhoneNumbersResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -166,6 +170,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -212,6 +218,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v1/calls:
     post:
@@ -237,7 +247,7 @@ paths:
         '400':
           description: >
             Validation error. Codes: VALIDATION_FAILED, INVALID_PHONE_NUMBER,
-            INVALID_METADATA, PHONE_NUMBER_NOT_USABLE.
+            INVALID_VARIABLES, INVALID_METADATA, PHONE_NUMBER_NOT_USABLE.
           content:
             application/json:
               schema:
@@ -250,6 +260,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -300,9 +312,10 @@ paths:
         '400':
           description: >
             Validation error. Possible codes: VALIDATION_FAILED (includes a
-            missing phone_number_id), INVALID_PHONE_NUMBER, INVALID_METADATA,
-            PHONE_NUMBER_NOT_USABLE. INVALID_PHONE_NUMBER and INVALID_METADATA
-            carry extensions.index (the offending calls[i] index).
+            missing phone_number_id), INVALID_PHONE_NUMBER, INVALID_VARIABLES,
+            INVALID_METADATA, PHONE_NUMBER_NOT_USABLE. INVALID_PHONE_NUMBER,
+            INVALID_VARIABLES, and INVALID_METADATA carry extensions.index (the
+            offending calls[i] index).
             PHONE_NUMBER_NOT_USABLE means the phone_number_id line exists but is
             not provisioned for outbound.
           content:
@@ -320,6 +333,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -359,6 +374,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v1/calls/{callId}/cancel:
     post:
@@ -402,6 +421,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v1/calls/batches/{batchId}/cancel:
     post:
@@ -434,6 +457,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
   /v1/calls/batches/{batchId}/calls:
     post:
@@ -480,6 +507,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
   securitySchemes:
@@ -505,6 +536,29 @@ components:
         Unexpected server error. Note: unexpected 5xx responses may not follow
         the uniform error envelope (a raw `{"detail":"Internal Server Error"}`
         may be returned instead).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: >
+        Rate limit exceeded (per-minute; code RATE_LIMITED). Applies to every
+        /v1 endpoint. A `Retry-After` header and `X-RateLimit-*` headers are
+        included; `extensions.retry_after` and `extensions.limit` carry the same
+        information.
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying.
+          schema:
+            type: integer
+        X-RateLimit-Limit:
+          description: The per-minute request limit.
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          description: Requests remaining in the current window.
+          schema:
+            type: integer
       content:
         application/json:
           schema:
@@ -764,6 +818,9 @@ components:
             Opaque metadata sent via POST /v1/calls/bulk, returned verbatim for
             correlation. Null when the call was created without metadata.
           additionalProperties: true
+        call_variables:
+          type: [object, 'null']
+          description: Template variables sent for this call, echoed back verbatim (the object passed as `variables` on creation). Null when none were sent (e.g. inbound).
         call_recording:
           $ref: '#/components/schemas/CallRecording'
 
@@ -807,9 +864,9 @@ components:
             code:
               type: string
               description: >
-                Machine-readable error code. Rare HTTPException fallbacks
-                (BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, CONFLICT, ERROR) may also
-                appear.
+                Machine-readable error code. Unmatched routes resolve to
+                RESOURCE_NOT_FOUND; other rare framework-level errors (e.g. HTTP
+                405 Method Not Allowed) may carry a generic `ERROR` code.
               enum:
                 - MISSING_AUTH_HEADER
                 - INVALID_AUTH_FORMAT
@@ -823,6 +880,7 @@ components:
                 - MALFORMED_CURSOR
                 - INVALID_PHONE_NUMBER
                 - INVALID_METADATA
+                - INVALID_VARIABLES
                 - ASSISTANT_NOT_FOUND
                 - PHONE_NUMBER_NOT_FOUND
                 - PHONE_NUMBER_NOT_USABLE
@@ -848,8 +906,9 @@ components:
             index:
               type: integer
               description: >
-                Present on INVALID_PHONE_NUMBER / INVALID_METADATA — the
-                offending `calls[i]` index.
+                Present on INVALID_PHONE_NUMBER / INVALID_METADATA /
+                INVALID_VARIABLES — the offending `calls[i]` index (or -1 for a
+                request-level `variables` violation).
             retry_after:
               type: integer
               description: Present on RATE_LIMITED (429) — seconds to wait (=60).

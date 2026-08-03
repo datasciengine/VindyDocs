@@ -52,6 +52,7 @@ Authorization: Bearer <api-key>
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Kimlik doğrulama hataları. |
 | `404` | `RESOURCE_NOT_FOUND` | Böyle bir çağrı yok veya başka bir şirkete ait. |
 | `409` | `ERR_CALL_NOT_CANCELLABLE` | Çağrı iptal edilemez: kuyrukta bekleyen bir giden çağrı değildir. Ya zaten dağıtılmış veya bitmiş, bir yarış koşulu oluşmuş ya da bir **gelen / çoktan başlamış çağrıdır** (bunlar asla iptal edilemez). |
+| `429` | `RATE_LIMITED` | Dakika-başı istek limiti aşıldı; `Retry-After` saniye sonra tekrar deneyin. |
 
 :::note İptalin artık mümkün olmadığı durum
 Kuyruktaki bir çağrı, beklemeden aranma durumuna hızla geçer. `409 ERR_CALL_NOT_CANCELLABLE` alırsanız, çağrı kuyruktan çıkmış ve API üzerinden durdurulamaz hâle gelmiş demektir. Çağrı sonlandığında sonucunu [`POST /v1/calls/list`](list-calls/index.md), [`GET /v1/calls/:callId`](get-call.md) veya bir [webhook olayı](webhooks.md) ile görürsünüz.

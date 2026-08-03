@@ -66,6 +66,7 @@ Returns the batch summary, plus `cancelled_now` — how many queued calls this r
 |---|---|---|
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Auth errors. |
 | `404` | `RESOURCE_NOT_FOUND` | Batch not found or not in your company. |
+| `429` | `RATE_LIMITED` | Rate limit exceeded (per-minute). Retry after `Retry-After` seconds. |
 
 :::note Only queued calls are affected
 This endpoint stops calls that haven't started yet. Calls already in progress run to completion, and finished calls are unchanged. The returned `cancelled_now` tells you exactly how many were stopped by this request. Calling it again on the same batch returns the current summary with `cancelled_now: 0`.

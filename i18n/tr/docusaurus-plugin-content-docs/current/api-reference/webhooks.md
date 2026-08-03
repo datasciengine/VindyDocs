@@ -84,6 +84,7 @@ X-Vindy-Delivery-Id: 0190aa00-1c5a-7000-8000-abc123def456
       "would_recommend": true
     },
     "call_metadata": { "crm_contact_id": "CNT-90412" },
+    "call_variables": { "first_name": "Batu" },
     "call_recording": {
       "available": true,
       "url": "https://your-bucket.s3.eu-central-1.amazonaws.com/call-records/...wav?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=86400&X-Amz-Signature=...",
@@ -131,6 +132,7 @@ X-Vindy-Delivery-Id: 0190aa00-1c5a-7000-8000-abc123def456
 | `call_transcript` | string \| null | Düz metin transcript. Her satır `[HH:MM:SS] Asistan:` (asistan, `Asistan`) veya `[HH:MM:SS] Müşteri:` (arayan, `Müşteri`) biçimindedir — Türkçe rol etiketleri, önlerinde UTC `HH:MM:SS` zaman damgasıyla — ve satırlar `\n` ile ayrılır. Çok kısa veya başarısız çağrılarda boş ya da `null` olabilir. |
 | `call_structured_data` | object \| null | AI tarafından çıkarılan veri; asistanınızın yapısal çıktı şemasının özellikleriyle anahtarlanan düz (flat) bir nesne olarak döner. Bir çıktı kimliğiyle anahtarlanmaz ve `name`/`result` sarmalayıcısı yoktur. Asistanın yapısal çıktı şeması yoksa ya da hiçbir şey çıkarılamadığında `null` — bkz. [Yapısal veri şekilleri](list-calls/index.md#structured-data-shapes). |
 | `call_metadata` | object \| null | [`POST /v1/calls/bulk`](bulk-create-calls.md) ile gönderdiğiniz opak metadata; korelasyon için aynen geri döner. Çağrı metadata ile oluşturulmadıysa `null`. |
+| `call_variables` | obje \| null | Bu çağrı için gönderilen şablon değişkenleri, aynen geri döner — çağrıyı oluştururken `variables` olarak gönderdiğiniz obje. Gönderilmediyse (ör. inbound çağrılar) `null`. |
 | `call_recording` | object | Kayıt durumu + URL — alanlar aşağıda. |
 
 **`data.call_recording`**
@@ -169,6 +171,7 @@ X-Vindy-Delivery-Id: 0190aa00-1c5a-7000-8000-abc123def456
     "call_transcript": null,
     "call_structured_data": null,
     "call_metadata": { "crm_contact_id": "CNT-90412" },
+    "call_variables": { "first_name": "Batu" },
     "call_recording": { "available": false }
   }
 }

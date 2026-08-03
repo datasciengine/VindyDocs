@@ -57,6 +57,7 @@ Authorization: Bearer <api-key>
     "would_recommend": true
   },
   "call_metadata": { "crm_contact_id": "CNT-90412" },
+  "call_variables": { "first_name": "Batu" },
   "call_recording": {
     "available": true,
     "url": "https://...?X-Amz-...",
@@ -83,6 +84,7 @@ Kuyrukta bekleyen bir giden çağrı, tamamlanana kadar bu minimal yapıyı dön
   "call_transcript": null,
   "call_structured_data": null,
   "call_metadata": { "crm_contact_id": "CNT-90412" },
+  "call_variables": { "first_name": "Batu" },
   "call_recording": { "available": false }
 }
 ```
@@ -96,6 +98,7 @@ Kuyrukta bekleyen bir giden çağrı, tamamlanana kadar bu minimal yapıyı dön
 | `call_id` | string | Çağrının kalıcı dize kimliği — yolda gönderdiğiniz değerin aynısı. |
 | `call_status` | string | Sonlanmış bir çağrı için `completed` veya `failed`. Hâlâ kuyrukta veya devam ederken çekilen bir giden çağrı için ise bu, kuyruk durumudur: `pending`, `scheduled`, `in_progress` veya `cancelled`. Fiziksel bir çağrı asla `cancelled` olmaz — iptal edilen kuyruktaki bir çağrı hiçbir zaman fiziksel bir çağrıya dönüşmez. |
 | `call_metadata` | object \| null | [`POST /v1/calls/bulk`](bulk-create-calls.md) ile gönderdiğiniz metadata; aynen geri döner. Çağrı metadata ile oluşturulmadıysa `null` olur. |
+| `call_variables` | obje \| null | Bu çağrı için gönderilen şablon değişkenleri, aynen geri döner — çağrıyı oluştururken `variables` olarak gönderdiğiniz obje. Gönderilmediyse (ör. inbound çağrılar) `null`. |
 
 Diğer tüm alanlar — `call_transcript`, `call_structured_data`, `call_recording`, serbest biçimli `call_end_reason` string'i ve `call_recording.available: false` ne anlama geldiği — için tam [Çağrıları Listele alan referansına](list-calls/index.md#yanıt-alanları) bakabilirsiniz.
 
@@ -109,6 +112,7 @@ Buradaki `call_recording.url`, **istek anında** üretilir ve yaklaşık **24 sa
 |---|---|---|
 | `401` | `MISSING_AUTH_HEADER`, `INVALID_AUTH_FORMAT`, `INVALID_API_KEY` | Kimlik doğrulama hataları. |
 | `404` | `RESOURCE_NOT_FOUND` | Çağrı bulunamadı, hâlâ devam eden bir gelen çağrı, bir tarayıcı (WebRTC) çağrısı veya başka bir şirkete ait. (Kendi oluşturduğunuz bir giden çağrı, kuyruktayken bile `200` döner — yukarıdaki Görünürlük'e bakın.) |
+| `429` | `RATE_LIMITED` | Dakika-başı istek limiti aşıldı; `Retry-After` saniye sonra tekrar deneyin. |
 
 :::note Varlık bilgisi sızdırılmaz
 Başka bir şirkete ait bir `call_id`, var olmayan bir kimlikle aynı `404 RESOURCE_NOT_FOUND` yanıtını döndürür — bkz. [Çoklu kiracılık](../concepts/multi-tenancy.md).

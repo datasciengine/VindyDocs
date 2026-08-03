@@ -102,6 +102,7 @@ The full parameter reference, accepted date formats, and copy-paste recipes live
         "would_recommend": true
       },
       "call_metadata": { "crm_contact_id": "CNT-90412" },
+      "call_variables": { "first_name": "Batu" },
       "call_recording": {
         "available": true,
         "url": "https://...",
@@ -123,6 +124,7 @@ The full parameter reference, accepted date formats, and copy-paste recipes live
       "call_transcript": "[11:02:10] Asistan: Hi, this is Vindy calling about our customer satisfaction survey. Is now a good time?\n[11:02:16] Müşteri: Sorry, wrong number.",
       "call_structured_data": null,
       "call_metadata": null,
+      "call_variables": { "first_name": "Batu" },
       "call_recording": {
         "available": false
       }
@@ -172,6 +174,7 @@ The list returns `failed` calls as well as `completed` ones — not only success
   "call_transcript": null,
   "call_structured_data": null,
   "call_metadata": { "crm_contact_id": "CNT-90418" },
+  "call_variables": { "first_name": "Batu" },
   "call_recording": { "available": false }
 }
 ```
@@ -204,6 +207,7 @@ The list returns `failed` calls as well as `completed` ones — not only success
 | `call_transcript` | string \| null | Plain-text transcript of the conversation. Each line is `[HH:MM:SS] Asistan:` (assistant, `Asistan`) or `[HH:MM:SS] Müşteri:` (caller, `Müşteri`) — Turkish role labels prefixed with a UTC `HH:MM:SS` timestamp — separated by newlines (`\n`). May be empty or null for very short or failed calls. |
 | `call_structured_data` | object \| null | AI-extracted data, returned as a flat object whose keys are your assistant's structured output schema properties — see [Structured data shapes](#structured-data-shapes). `null` when the assistant has no structured output schema or nothing could be extracted (or the stored data couldn't be parsed). |
 | `call_metadata` | object \| null | The metadata you attached when creating the call via [`POST /v1/calls/bulk`](../bulk-create-calls.md), returned to you verbatim for correlation. `null` if the call was created without metadata. See [Metadata](../bulk-create-calls.md#metadata) for the rules. |
+| `call_variables` | object \| null | The template variables sent for this call, echoed back verbatim — the same object you passed as `variables` when creating the call. `null` when none were sent (e.g. inbound calls). |
 | `call_recording` | object | Recording availability + URL (below). |
 
 **`call_recording` object**
